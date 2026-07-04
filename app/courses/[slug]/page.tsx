@@ -1,0 +1,459 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import Navbar from '@/components/navbar'
+import Footer from '@/components/footer'
+import { ArrowRight, BookOpen, GraduationCap, MessageCircle, Sparkles, Users } from 'lucide-react'
+
+type CourseData = {
+  slug: string
+  name: string
+  heroTitle: string
+  intro: string
+  whyTitle: string
+  mainImage: string
+  highlights: Array<{
+    title: string
+    description: string
+    image: string
+  }>
+  structureIntro: string
+  levels: Array<{
+    level: string
+    title: string
+    description: string
+  }>
+  teachingTitle: string
+  teachingIntro: string
+  teachingStyles: Array<{
+    title: string
+    description: string
+    image: string
+  }>
+  ctaTitle: string
+  ctaDescription: string
+  bookLink: string
+  planLink: string
+  ctaImage: string
+}
+
+const courseData: CourseData[] = [
+  {
+    slug: 'french',
+    name: 'French',
+    heroTitle: 'Learn French with Tongues Trend',
+    intro:
+      'Discover the beauty of the French language with personalised online lessons. Whether you’re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
+    whyTitle: 'Why learn French with us?',
+    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    highlights: [
+      {
+        title: '1 on 1 Lessons',
+        description: 'Live online lessons with a professional teacher.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public',
+      },
+      {
+        title: 'CEFR Aligned',
+        description: 'Progress according to CEFR levels (A1 → C2).',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public',
+      },
+      {
+        title: 'Customised Pacing',
+        description: 'Customised pacing for your goals.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+    ],
+    structureIntro:
+      'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning. That means you’ll always know your exact level and what skills you’re working toward.',
+    levels: [
+      { level: 'A1', title: 'Beginner', description: 'Greet others, introduce yourself, ask and answer simple questions, use basic phrases.' },
+      { level: 'A2', title: 'Elementary', description: 'Handle everyday situations like shopping and directions, and talk about the past or future in simple terms.' },
+      { level: 'B1', title: 'Intermediate', description: 'Share opinions, describe experiences, and manage workplace or travel conversations.' },
+      { level: 'B2', title: 'Upper Intermediate', description: 'Discuss abstract ideas, read longer texts, and handle debates and arguments.' },
+      { level: 'C1', title: 'Advanced', description: 'Use French naturally in academic, professional, and social contexts.' },
+      { level: 'C2', title: 'Mastery', description: 'Reach near-native fluency and understand almost everything heard or read.' },
+    ],
+    teachingTitle: 'Our Teaching Style',
+    teachingIntro:
+      'Learning a language is more than memorizing words. At Tongues Trend, our teaching style combines structure with interaction so every lesson builds confidence and practical skills.',
+    teachingStyles: [
+      {
+        title: 'Interactive & Practical',
+        description: 'Lessons are live on Zoom, with real conversation practice focused on everyday communication and situations relevant to you.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+      {
+        title: 'Structured',
+        description: 'Each level is structured around clear goals in speaking, listening, reading, and writing.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/444cee7a-227f-420b-c821-fcf484eabd00/public',
+      },
+      {
+        title: 'Full Support',
+        description: 'You’ll get digital materials such as PDFs, exercises, and whiteboard activities to reinforce learning between lessons.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/3025ef4f-e7db-480d-338f-89ff2d7b5f00/public',
+      },
+    ],
+    ctaTitle: 'Want to discuss your learning needs first? Book a free consultation lesson!',
+    ctaDescription:
+      'A 30-minute consultation lesson with a teacher to discuss your goals, learning style, and expectations before committing.',
+    bookLink: 'https://tonguestrend.simplybook.me/v2/#book/service/6/count/1/',
+    planLink: 'https://www.tonguestrend.com/plans',
+    ctaImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fc8e5be2-917e-4669-4d71-be483f5e3600/public',
+  },
+  {
+    slug: 'english',
+    name: 'English',
+    heroTitle: 'Learn English with Tongues Trend',
+    intro:
+      'Discover the beauty of the English language with personalised online lessons. Whether you’re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
+    whyTitle: 'Why learn English with us?',
+    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    highlights: [
+      {
+        title: '1 on 1 Lessons',
+        description: 'Live online lessons with a professional teacher.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public',
+      },
+      {
+        title: 'CEFR Aligned',
+        description: 'Progress according to CEFR levels (A1 → C2).',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public',
+      },
+      {
+        title: 'Customised Pacing',
+        description: 'Customised pacing for your goals.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+    ],
+    structureIntro:
+      'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning. That means you’ll always know your exact level and what skills you’re working toward.',
+    levels: [
+      { level: 'A1', title: 'Beginner', description: 'Greet others, introduce yourself, ask and answer simple questions, use basic phrases.' },
+      { level: 'A2', title: 'Elementary', description: 'Handle everyday situations like shopping and directions, and talk about the past or future in simple terms.' },
+      { level: 'B1', title: 'Intermediate', description: 'Share opinions, describe experiences, and manage workplace or travel conversations.' },
+      { level: 'B2', title: 'Upper Intermediate', description: 'Discuss abstract ideas, read longer texts, and handle debates and arguments.' },
+      { level: 'C1', title: 'Advanced', description: 'Use English naturally in academic, professional, and social contexts.' },
+      { level: 'C2', title: 'Mastery', description: 'Reach near-native fluency and understand almost everything heard or read.' },
+    ],
+    teachingTitle: 'Our Teaching Style',
+    teachingIntro:
+      'Learning a language is more than memorizing words. At Tongues Trend, our teaching style combines structure with interaction so every lesson builds confidence and practical skills.',
+    teachingStyles: [
+      {
+        title: 'Interactive & Practical',
+        description: 'Lessons are live on Zoom, with real conversation practice focused on everyday communication and situations relevant to you.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+      {
+        title: 'Structured',
+        description: 'Each level is structured around clear goals in speaking, listening, reading, and writing.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/444cee7a-227f-420b-c821-fcf484eabd00/public',
+      },
+      {
+        title: 'Full Support',
+        description: 'You’ll get digital materials such as PDFs, exercises, and whiteboard activities to reinforce learning between lessons.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/d08fc03b-d416-409b-fe78-7de1865aab00/public',
+      },
+    ],
+    ctaTitle: 'Want to discuss your learning needs first? Book a free consultation lesson!',
+    ctaDescription:
+      'A 30-minute consultation lesson with a teacher to discuss your goals, learning style, and expectations before committing.',
+    bookLink: 'https://tonguestrend.simplybook.me/v2/#book/service/6/count/1/',
+    planLink: 'https://www.tonguestrend.com/plans',
+    ctaImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fc8e5be2-917e-4669-4d71-be483f5e3600/public',
+  },
+  {
+    slug: 'german',
+    name: 'German',
+    heroTitle: 'Learn German with Tongues Trend',
+    intro:
+      'Discover the beauty of the German language with personalised online lessons. Whether you’re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
+    whyTitle: 'Why learn German with us?',
+    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    highlights: [
+      {
+        title: '1 on 1 Lessons',
+        description: 'Live online lessons with a professional teacher.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public',
+      },
+      {
+        title: 'CEFR Aligned',
+        description: 'Progress according to CEFR levels (A1 → C2).',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public',
+      },
+      {
+        title: 'Customised Pacing',
+        description: 'Customised pacing for your goals.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+    ],
+    structureIntro:
+      'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning. That means you’ll always know your exact level and what skills you’re working toward.',
+    levels: [
+      { level: 'A1', title: 'Beginner', description: 'Greet others, introduce yourself, ask and answer simple questions, use basic phrases.' },
+      { level: 'A2', title: 'Elementary', description: 'Handle everyday situations like shopping and directions, and talk about the past or future in simple terms.' },
+      { level: 'B1', title: 'Intermediate', description: 'Share opinions, describe experiences, and manage workplace or travel conversations.' },
+      { level: 'B2', title: 'Upper Intermediate', description: 'Discuss abstract ideas, read longer texts, and handle debates and arguments.' },
+      { level: 'C1', title: 'Advanced', description: 'Use German naturally in academic, professional, and social contexts.' },
+      { level: 'C2', title: 'Mastery', description: 'Reach near-native fluency and understand almost everything heard or read.' },
+    ],
+    teachingTitle: 'Our Teaching Style',
+    teachingIntro:
+      'Learning a language is more than memorizing words. At Tongues Trend, our teaching style combines structure with interaction so every lesson builds confidence and practical skills.',
+    teachingStyles: [
+      {
+        title: 'Interactive & Practical',
+        description: 'Lessons are live on Zoom, with real conversation practice focused on everyday communication and situations relevant to you.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+      {
+        title: 'Structured',
+        description: 'Each level is structured around clear goals in speaking, listening, reading, and writing.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/444cee7a-227f-420b-c821-fcf484eabd00/public',
+      },
+      {
+        title: 'Full Support',
+        description: 'You’ll get digital materials such as PDFs, exercises, and whiteboard activities to reinforce learning between lessons.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/d08fc03b-d416-409b-fe78-7de1865aab00/public',
+      },
+    ],
+    ctaTitle: 'Book a Free Consultation Lesson',
+    ctaDescription:
+      'A 30-minute consultation lesson with a teacher to discuss your goals, learning style, and expectations before committing.',
+    bookLink: 'https://tonguestrend.simplybook.me/v2/#book/service/6/count/1/',
+    planLink: 'https://www.tonguestrend.com/plans',
+    ctaImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fc8e5be2-917e-4669-4d71-be483f5e3600/public',
+  },
+  {
+    slug: 'kiswahili',
+    name: 'Kiswahili',
+    heroTitle: 'Learn Kiswahili with Tongues Trend',
+    intro:
+      'Discover the beauty of the Kiswahili language with personalised online lessons. Whether you’re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
+    whyTitle: 'Why learn Kiswahili with us?',
+    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    highlights: [
+      {
+        title: '1 on 1 Lessons',
+        description: 'Live online lessons with a professional teacher.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public',
+      },
+      {
+        title: 'CEFR Aligned',
+        description: 'Progress according to CEFR levels (A1 → C2).',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public',
+      },
+      {
+        title: 'Customised Pacing',
+        description: 'Customised pacing for your goals.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+    ],
+    structureIntro:
+      'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning. That means you’ll always know your exact level and what skills you’re working toward.',
+    levels: [
+      { level: 'A1', title: 'Beginner', description: 'Greet others, introduce yourself, ask and answer simple questions, use basic phrases.' },
+      { level: 'A2', title: 'Elementary', description: 'Handle everyday situations like shopping and directions, and talk about the past or future in simple terms.' },
+      { level: 'B1', title: 'Intermediate', description: 'Share opinions, describe experiences, and manage workplace or travel conversations.' },
+      { level: 'B2', title: 'Upper Intermediate', description: 'Discuss abstract ideas, read longer texts, and handle debates and arguments.' },
+      { level: 'C1', title: 'Advanced', description: 'Use Kiswahili naturally in academic, professional, and social contexts.' },
+      { level: 'C2', title: 'Mastery', description: 'Reach near-native fluency and understand almost everything heard or read.' },
+    ],
+    teachingTitle: 'Our Teaching Style',
+    teachingIntro:
+      'Learning a language is more than memorizing words. At Tongues Trend, our teaching style combines structure with interaction so every lesson builds confidence and practical skills.',
+    teachingStyles: [
+      {
+        title: 'Interactive & Practical',
+        description: 'Lessons are live on Zoom, with real conversation practice focused on everyday communication and situations relevant to you.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public',
+      },
+      {
+        title: 'Structured',
+        description: 'Each level is structured around clear goals in speaking, listening, reading, and writing.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/444cee7a-227f-420b-c821-fcf484eabd00/public',
+      },
+      {
+        title: 'Full Support',
+        description: 'You’ll get digital materials such as PDFs, exercises, and whiteboard activities to reinforce learning between lessons.',
+        image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/d08fc03b-d416-409b-fe78-7de1865aab00/public',
+      },
+    ],
+    ctaTitle: 'Book a Free Consultation Lesson',
+    ctaDescription:
+      'A 30-minute consultation lesson with a teacher to discuss your goals, learning style, and expectations before committing.',
+    bookLink: 'https://tonguestrend.simplybook.me/v2/#book/service/6/count/1/',
+    planLink: 'https://www.tonguestrend.com/plans',
+    ctaImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fc8e5be2-917e-4669-4d71-be483f5e3600/public',
+  },
+]
+
+export function generateStaticParams() {
+  return courseData.map((course) => ({ slug: course.slug }))
+}
+
+export default async function CoursePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const course = courseData.find((item) => item.slug === slug)
+
+  if (!course) {
+    notFound()
+  }
+
+  return (
+    <main className="w-full bg-white">
+      <Navbar />
+
+      <section className="w-full bg-navy text-white pt-24 pb-20 sm:pt-28 sm:pb-24 lg:pt-32 lg:pb-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="text-gold font-semibold uppercase tracking-[0.25em] text-sm mb-4">Language Course</p>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Poppins' }}>
+                {course.heroTitle}
+              </h1>
+              <p className="text-lg sm:text-xl text-gray-300 max-w-2xl leading-relaxed mb-8">{course.intro}</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href={course.bookLink}
+                  className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3 font-semibold text-navy transition-all duration-150 hover:bg-gold-light"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Book a Free Consultation <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+                <Link
+                  href={course.planLink}
+                  className="inline-flex items-center justify-center rounded-full border-2 border-white px-7 py-3 font-semibold text-white transition-all duration-150 hover:bg-white hover:text-navy"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  View Course Plans
+                </Link>
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
+              <img src={course.mainImage} alt={`${course.name} learning`} className="h-72 w-full rounded-2xl object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
+              {course.whyTitle}
+            </h2>
+            <p className="text-lg text-gray-mid max-w-2xl mx-auto">Here’s why students love learning with us.</p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {course.highlights.map((item) => (
+              <div key={item.title} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <img src={item.image} alt={item.title} className="mb-5 h-40 w-full rounded-xl object-cover" />
+                <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>
+                  {item.title}
+                </h3>
+                <p className="text-gray-mid leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-gray-light py-20 sm:py-24 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+            <div>
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
+                <GraduationCap size={26} />
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
+                Course Structure ({course.name} Levels)
+              </h2>
+              <p className="text-gray-mid leading-relaxed mb-8">{course.structureIntro}</p>
+              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold mb-3">CEFR-Aligned</p>
+                <ul className="space-y-3">
+                  {course.levels.map((level) => (
+                    <li key={level.level} className="rounded-xl border border-gray-100 bg-gray-light px-4 py-3">
+                      <span className="font-semibold text-navy">{level.level} — {level.title}</span>
+                      <span className="ml-2 text-gray-dark">{level.description}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+              <img src={course.ctaImage} alt={`${course.name} course structure`} className="mb-6 h-56 w-full rounded-2xl object-cover" />
+              <h3 className="text-2xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>
+                Clear progress at every step
+              </h3>
+              <p className="text-gray-mid leading-relaxed">
+                Each level is designed to help learners move from simple everyday communication to confident, advanced expression, with feedback and support throughout.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
+              {course.teachingTitle}
+            </h2>
+            <p className="text-lg text-gray-mid max-w-2xl mx-auto">{course.teachingIntro}</p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-3">
+            {course.teachingStyles.map((item) => (
+              <div key={item.title} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <img src={item.image} alt={item.title} className="mb-5 h-40 w-full rounded-xl object-cover" />
+                <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>
+                  {item.title}
+                </h3>
+                <p className="text-gray-mid leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-navy py-20 sm:py-24 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div>
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
+                <MessageCircle size={24} />
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4" style={{ fontFamily: 'Poppins' }}>
+                {course.ctaTitle}
+              </h2>
+              <p className="text-lg text-gray-300 leading-relaxed mb-8">{course.ctaDescription}</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href={course.bookLink}
+                  className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3 font-semibold text-navy transition-all duration-150 hover:bg-gold-light"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Book Now
+                </Link>
+                <Link
+                  href={course.planLink}
+                  className="inline-flex items-center justify-center rounded-full border-2 border-white px-7 py-3 font-semibold text-white transition-all duration-150 hover:bg-white hover:text-navy"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Select Your Plan
+                </Link>
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
+              <img src={course.ctaImage} alt={`${course.name} course call to action`} className="h-72 w-full rounded-2xl object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </main>
+  )
+}
