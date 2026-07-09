@@ -3,18 +3,23 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight } from 'lucide-react'
+import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight, AlertCircle } from 'lucide-react'
+import { register as apiRegister } from '@/lib/auth'
+import { ApiException } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 
 export default function StudentRegisterPage() {
   const router = useRouter()
+  const { refresh } = useAuth()
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     language: 'Spanish',
-    level: 'Beginner'
+    level: 'Beginner',
   })
 
   const handleNext = (e: React.FormEvent) => {
@@ -22,20 +27,31 @@ export default function StudentRegisterPage() {
     setStep(2)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     setIsLoading(true)
 
-    // Mock API call delay
-    setTimeout(() => {
+    try {
+      await apiRegister({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      })
+      await refresh() // sync AuthContext with the new session
+      router.push('/learn/dashboard')
+    } catch (err) {
+      if (err instanceof ApiException) {
+        setError(err.message)
+      } else {
+        setError('An unexpected error occurred. Please try again.')
+      }
       setIsLoading(false)
-      // Redirect to student dashboard
-      router.push('/learn')
-    }, 1500)
+    }
   }
 
   const updateFormData = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -43,7 +59,7 @@ export default function StudentRegisterPage() {
       {/* Background decorations */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[120px]" />
-      
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <Link href="/" className="flex justify-center mb-6">
           <img src="/logo.png" alt="Tongues Trend" className="h-10" />
@@ -58,16 +74,15 @@ export default function StudentRegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
-          
+
           {/* Step Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between relative">
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0" />
-              <div 
+              <div
                 className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full z-0 transition-all duration-500"
                 style={{ width: step === 1 ? '50%' : '100%' }}
               />
-              
               <div className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'} font-bold text-sm shadow-md transition-colors`}>
                 1
               </div>
@@ -80,6 +95,14 @@ export default function StudentRegisterPage() {
               <span>Learning Goals</span>
             </div>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="flex items-center gap-3 p-3 mb-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           {step === 1 ? (
             <form className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500" onSubmit={handleNext}>
@@ -138,6 +161,7 @@ export default function StudentRegisterPage() {
                     name="password"
                     type="password"
                     required
+                    minLength={6}
                     value={formData.password}
                     onChange={(e) => updateFormData('password', e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-white/50 focus:bg-white"
@@ -169,8 +193,8 @@ export default function StudentRegisterPage() {
                       type="button"
                       onClick={() => updateFormData('language', lang)}
                       className={`flex items-center gap-2 p-3 border rounded-xl text-left transition-all ${
-                        formData.language === lang 
-                          ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary' 
+                        formData.language === lang
+                          ? 'border-primary bg-primary/5 text-primary ring-1 ring-primary'
                           : 'border-gray-200 bg-white hover:border-primary/50'
                       }`}
                     >
@@ -192,8 +216,8 @@ export default function StudentRegisterPage() {
                       type="button"
                       onClick={() => updateFormData('level', level)}
                       className={`flex flex-col items-center justify-center gap-2 p-3 border rounded-xl transition-all ${
-                        formData.level === level 
-                          ? 'border-secondary bg-secondary/10 text-secondary ring-1 ring-secondary' 
+                        formData.level === level
+                          ? 'border-secondary bg-secondary/10 text-secondary ring-1 ring-secondary'
                           : 'border-gray-200 bg-white hover:border-secondary/50'
                       }`}
                     >

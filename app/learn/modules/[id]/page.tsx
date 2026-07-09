@@ -1,40 +1,73 @@
 'use client'
 
 import LearnTopbar from '@/components/learn-topbar'
-import { useState } from 'react'
-import { Download, FileText, Volume2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Download, FileText, Volume2, Video, File, Loader2, AlertCircle } from 'lucide-react'
+import { getEnrollmentById, type Enrollment } from '@/lib/api/enrollments'
+import { getMaterials, type Material } from '@/lib/api/materials'
+import { ApiException } from '@/lib/api'
+
+function getFileIcon(type: string) {
+  const t = type.toLowerCase()
+  if (t.includes('pdf')) return <FileText size={20} className="text-red-500" />
+  if (t.includes('audio') || t.includes('mp3')) return <Volume2 size={20} className="text-blue-500" />
+  if (t.includes('video') || t.includes('mp4')) return <Video size={20} className="text-purple-500" />
+  return <File size={20} className="text-gray-500" />
+}
 
 export default function ModulePage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState<'materials' | 'quiz' | 'notes'>('materials')
   const [materialsViewed, setMaterialsViewed] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
 
-  const module = {
-    title: 'Everyday Conversations',
-    level: 'A2 - Elementary',
-    language: 'French',
+  const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
+  const [materials, setMaterials] = useState<Material[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const enr = await getEnrollmentById(params.id)
+        setEnrollment(enr)
+        if (enr.courseId) {
+          const mats = await getMaterials(enr.courseId)
+          setMaterials(mats)
+        }
+      } catch (err) {
+        setError(err instanceof ApiException ? err.message : 'Failed to load module')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    load()
+  }, [params.id])
+
+  if (isLoading) {
+    return (
+      <>
+        <LearnTopbar title="Module Details" />
+        <div className="flex items-center justify-center py-20 text-gray-400">
+          <Loader2 size={32} className="animate-spin mr-3" />
+          Loading module…
+        </div>
+      </>
+    )
   }
 
-  const materials = [
-    {
-      id: 1,
-      name: 'Lesson Slides.pdf',
-      size: '2.4 MB',
-      type: 'pdf',
-    },
-    {
-      id: 2,
-      name: 'Vocabulary List.pdf',
-      size: '1.2 MB',
-      type: 'pdf',
-    },
-    {
-      id: 3,
-      name: 'Pronunciation Guide.mp3',
-      size: '15 MB',
-      type: 'audio',
-    },
-  ]
+  if (error || !enrollment) {
+    return (
+      <>
+        <LearnTopbar title="Module Details" />
+        <div className="p-6">
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+            <AlertCircle size={20} />
+            {error || 'Enrollment not found'}
+          </div>
+        </div>
+      </>
+    )
+  }
 
   const quizQuestions = [
     {
@@ -43,149 +76,98 @@ export default function ModulePage({ params }: { params: { id: string } }) {
       options: ['Bonsoir', 'Bonjour', 'Bonne nuit', 'Au revoir'],
       correct: 1,
     },
-    {
-      id: 2,
-      question: 'What is the correct response to "Comment allez-vous?"',
-      options: ['Je vais mal', 'Je vais bien', 'Je suis ici', 'Je sais pas'],
-      correct: 1,
-    },
-    {
-      id: 3,
-      question: 'Complete: "Je m\'appelle ___"',
-      options: ['suis', 'est', 'am', 'N/A'],
-      correct: 3,
-    },
-  ]
+  ] // mockup quiz for now until Quiz module is built
 
   return (
     <>
-      <LearnTopbar title={module.title} />
-      <div className="flex-1 overflow-y-auto pb-24">
-        {/* Module Header */}
-        <div className="bg-white border-b border-gray-100 p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-2xl">{module.language === 'French' ? '🇫🇷' : '🇬🇧'}</span>
-            <h1 className="text-2xl font-bold text-navy">{module.title}</h1>
-            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-semibold">
-              {module.level}
-            </span>
-          </div>
-          <p className="text-gray-600 text-sm">Master essential phrases for daily conversations</p>
+      <LearnTopbar title={enrollment.language ?? enrollment.courseName ?? 'Module Details'} />
+      <div className="flex-1 overflow-y-auto p-6 max-w-4xl">
+        <div className="bg-navy rounded-2xl p-8 text-white mb-8">
+          <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
+            {enrollment.language ?? enrollment.courseName}
+          </h2>
+          <p className="text-gray-300">Level: {enrollment.level ?? 'General'}</p>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white border-b border-gray-100 px-6 flex gap-6">
-          {(['materials', 'quiz', 'notes'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-4 px-2 font-semibold text-sm transition-all border-b-2 ${
-                activeTab === tab
-                  ? 'border-gold text-gold'
-                  : 'border-transparent text-gray-600 hover:text-navy'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+        <div className="flex items-center gap-4 border-b border-gray-200 mb-6">
+          <button
+            onClick={() => setActiveTab('materials')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'materials' ? 'border-gold text-navy' : 'border-transparent text-gray-500 hover:text-navy'}`}
+          >
+            Learning Materials
+          </button>
+          <button
+            onClick={() => setActiveTab('quiz')}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'quiz' ? 'border-gold text-navy' : 'border-transparent text-gray-500 hover:text-navy'}`}
+          >
+            Practice Quiz
+          </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {/* Materials Tab */}
-          {activeTab === 'materials' && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-navy mb-4">Course Materials</h3>
-              <div className="space-y-3">
-                {materials.map((material) => (
-                  <div
-                    key={material.id}
-                    onClick={() => setMaterialsViewed(true)}
-                    className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gold hover:shadow-sm transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {material.type === 'pdf' ? (
-                          <FileText size={24} className="text-red-500" />
-                        ) : (
-                          <Volume2 size={24} className="text-blue-500" />
-                        )}
-                        <div>
-                          <p className="font-semibold text-navy text-sm">{material.name}</p>
-                          <p className="text-xs text-gray-500">{material.size}</p>
-                        </div>
+        {activeTab === 'materials' && (
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            {materials.length === 0 ? (
+              <p className="text-gray-500 text-sm">No materials available for this course yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {materials.map((m) => (
+                  <div key={m._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gold-50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm">
+                        {getFileIcon(m.fileType)}
                       </div>
-                      <button className="text-gold font-semibold text-sm hover:text-gold-light flex items-center gap-1">
-                        <Download size={16} />
-                        Download
-                      </button>
+                      <div>
+                        <p className="font-semibold text-navy text-sm">{m.title}</p>
+                        <p className="text-xs text-gray-500 uppercase">{m.fileType}</p>
+                      </div>
                     </div>
+                    {m.fileUrl ? (
+                      <a href={m.fileUrl} target="_blank" rel="noreferrer" className="p-2 text-gold hover:bg-gold-100 rounded-lg transition-colors" onClick={() => setMaterialsViewed(true)}>
+                        <Download size={20} />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400">No link</span>
+                    )}
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-4">
-                ✓ All materials viewed
-              </p>
+            )}
+            
+            <div className="mt-8 flex justify-end">
+              <button
+                disabled={!materialsViewed || isCompleted}
+                onClick={() => {
+                  setIsCompleted(true)
+                  // Next step: call progress update API here
+                }}
+                className="px-6 py-3 bg-gold hover:bg-gold-light text-navy font-semibold rounded-full transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCompleted ? 'Completed' : 'Mark as Complete'}
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Quiz Tab */}
-          {activeTab === 'quiz' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-navy">Module Quiz</h3>
-              {quizQuestions.map((q) => (
-                <div key={q.id} className="bg-white rounded-xl p-6 border border-gray-100">
-                  <p className="font-semibold text-navy mb-4 text-sm">Question {q.id}</p>
-                  <p className="text-navy font-medium mb-4">{q.question}</p>
+        {activeTab === 'quiz' && (
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <h3 className="text-lg font-bold text-navy mb-6">Knowledge Check</h3>
+            <div className="space-y-8">
+              {quizQuestions.map((q, qIdx) => (
+                <div key={q.id}>
+                  <p className="font-semibold text-navy mb-4">{qIdx + 1}. {q.question}</p>
                   <div className="space-y-2">
-                    {q.options.map((option, idx) => (
-                      <label key={idx} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-gold hover:bg-gold/5 cursor-pointer transition-all">
-                        <input
-                          type="radio"
-                          name={`q${q.id}`}
-                          className="w-4 h-4 accent-gold"
-                        />
-                        <span className="text-sm text-gray-700">{option}</span>
+                    {q.options.map((opt, oIdx) => (
+                      <label key={oIdx} className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name={`q-${q.id}`} className="w-4 h-4 text-gold focus:ring-gold border-gray-300" />
+                        <span className="ml-3 text-sm text-gray-700">{opt}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
-          )}
-
-          {/* Notes Tab */}
-          {activeTab === 'notes' && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-navy mb-4">Your Notes</h3>
-              <textarea
-                placeholder="Add your notes here..."
-                className="w-full h-48 p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 text-sm"
-              />
-              <button className="bg-gold text-navy px-6 py-2 rounded-full font-semibold text-sm hover:bg-gold-light transition-all">
-                Save Notes
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 flex items-center justify-between md:pl-64">
-        <p className="text-sm text-gray-600">
-          {materialsViewed ? (
-            <span className="text-green-600 font-semibold">✓ All materials reviewed</span>
-          ) : (
-            <span>Review all materials to unlock completion</span>
-          )}
-        </p>
-        <button
-          onClick={() => setIsCompleted(true)}
-          disabled={!materialsViewed}
-          className="bg-gold text-navy px-8 py-2 rounded-full font-semibold text-sm hover:bg-gold-light disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-        >
-          Mark Complete
-        </button>
+          </div>
+        )}
       </div>
     </>
   )

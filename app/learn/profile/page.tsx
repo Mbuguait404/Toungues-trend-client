@@ -1,58 +1,110 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import LearnTopbar from '@/components/learn-topbar'
-import { useState } from 'react'
-import { Upload, Eye, EyeOff } from 'lucide-react'
+import { Upload, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { apiFetch, ApiException } from '@/lib/api'
+import type { AuthUser } from '@/lib/auth'
+
+interface UpdateProfileDto {
+  name?: string
+  phone?: string
+  country?: string
+}
 
 export default function ProfilePage() {
+  const { user, refresh } = useAuth()
+
   const [formData, setFormData] = useState({
-    fullName: 'Alex Johnson',
-    email: 'alex.johnson@example.com',
-    phone: '+1 (555) 123-4567',
-    country: 'United States',
+    name: '',
+    email: '',
+    phone: '',
+    country: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   })
 
   const [showPasswordFields, setShowPasswordFields] = useState(false)
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  })
+  const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false })
+  const [isSaving, setIsSaving] = useState(false)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  const [notifications, setNotifications] = useState({
-    emailUpdates: true,
-    lessonReminders: true,
-    promotions: false,
-  })
+  // Populate form from auth user on mount
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name ?? '',
+        email: user.email ?? '',
+        phone: user.phone ?? '',
+        country: user.country ?? '',
+      }))
+    }
+  }, [user])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleNotificationChange = (key: keyof typeof notifications) => {
-    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+  const handleSave = async () => {
+    setSuccessMsg(null)
+    setErrorMsg(null)
+    setIsSaving(true)
+
+    try {
+      const dto: UpdateProfileDto = {
+        name: formData.name,
+        phone: formData.phone || undefined,
+        country: formData.country || undefined,
+      }
+      await apiFetch<AuthUser>('/users/me', { method: 'PUT', body: dto, auth: true })
+      await refresh()
+      setSuccessMsg('Profile updated successfully!')
+    } catch (err) {
+      setErrorMsg(err instanceof ApiException ? err.message : 'Failed to save profile')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleSave = () => {
-    alert('Profile updated successfully!')
-  }
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?'
 
   return (
     <>
       <LearnTopbar title="Profile" />
       <div className="flex-1 overflow-y-auto p-6 max-w-2xl">
         <div className="space-y-8">
-          {/* Avatar Section */}
+          {/* Status messages */}
+          {successMsg && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+              <CheckCircle2 size={18} />
+              {successMsg}
+            </div>
+          )}
+          {errorMsg && (
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <AlertCircle size={18} />
+              {errorMsg}
+            </div>
+          )}
+
+          {/* Avatar */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
             <h3 className="text-lg font-bold text-navy mb-4">Profile Photo</h3>
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center text-navy text-3xl font-bold">
-                AJ
-              </div>
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="w-20 h-20 rounded-full object-cover" />
+              ) : (
+                <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center text-navy text-3xl font-bold">
+                  {initials}
+                </div>
+              )}
               <button className="flex items-center gap-2 bg-gold text-navy px-4 py-2 rounded-full font-semibold text-sm hover:bg-gold-light transition-all">
                 <Upload size={16} />
                 Upload Photo
@@ -68,8 +120,8 @@ export default function ProfilePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                 <input
                   type="text"
-                  name="fullName"
-                  value={formData.fullName}
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20"
                 />
@@ -79,7 +131,6 @@ export default function ProfilePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email (Read-only)</label>
                 <input
                   type="email"
-                  name="email"
                   value={formData.email}
                   disabled
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
@@ -94,6 +145,7 @@ export default function ProfilePage() {
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20"
+                  placeholder="+1 (555) 000-0000"
                 />
               </div>
 
@@ -105,12 +157,10 @@ export default function ProfilePage() {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20"
                 >
-                  <option>United States</option>
-                  <option>Switzerland</option>
-                  <option>Kenya</option>
-                  <option>France</option>
-                  <option>Germany</option>
-                  <option>United Kingdom</option>
+                  <option value="">Select country…</option>
+                  {['Kenya', 'United States', 'Switzerland', 'France', 'Germany', 'United Kingdom', 'Canada', 'Australia'].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -128,101 +178,43 @@ export default function ProfilePage() {
 
             {showPasswordFields && (
               <div className="mt-4 space-y-4 pt-4 border-t border-gray-100">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPasswords.current ? 'text' : 'password'}
-                      name="currentPassword"
-                      value={formData.currentPassword}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 pr-10"
-                    />
-                    <button
-                      onClick={() =>
-                        setShowPasswords((prev) => ({ ...prev, current: !prev.current }))
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    >
-                      {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPasswords.new ? 'text' : 'password'}
-                      name="newPassword"
-                      value={formData.newPassword}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 pr-10"
-                    />
-                    <button
-                      onClick={() => setShowPasswords((prev) => ({ ...prev, new: !prev.new }))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    >
-                      {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPasswords.confirm ? 'text' : 'password'}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 pr-10"
-                    />
-                    <button
-                      onClick={() =>
-                        setShowPasswords((prev) => ({ ...prev, confirm: !prev.confirm }))
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    >
-                      {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
+                {(['current', 'new', 'confirm'] as const).map((key) => {
+                  const labels = { current: 'Current Password', new: 'New Password', confirm: 'Confirm Password' }
+                  const names = { current: 'currentPassword', new: 'newPassword', confirm: 'confirmPassword' }
+                  return (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{labels[key]}</label>
+                      <div className="relative">
+                        <input
+                          type={showPasswords[key] ? 'text' : 'password'}
+                          name={names[key]}
+                          value={(formData as any)[names[key]]}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPasswords((p) => ({ ...p, [key]: !p[key] }))}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        >
+                          {showPasswords[key] ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
-          </div>
-
-          {/* Notification Preferences */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100">
-            <h3 className="text-lg font-bold text-navy mb-4">Notification Preferences</h3>
-            <div className="space-y-3">
-              {[
-                { key: 'emailUpdates' as const, label: 'Email Updates', description: 'Receive course and progress updates' },
-                { key: 'lessonReminders' as const, label: 'Lesson Reminders', description: 'Get notified 1 hour before your lessons' },
-                { key: 'promotions' as const, label: 'Promotions & Offers', description: 'Receive special offers and promotions' },
-              ].map((pref) => (
-                <label key={pref.key} className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={notifications[pref.key]}
-                    onChange={() => handleNotificationChange(pref.key)}
-                    className="w-4 h-4 accent-gold rounded"
-                  />
-                  <div>
-                    <p className="font-medium text-navy text-sm">{pref.label}</p>
-                    <p className="text-xs text-gray-500">{pref.description}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
           </div>
 
           {/* Save Button */}
           <button
             onClick={handleSave}
-            className="w-full bg-gold text-navy py-3 rounded-full font-semibold hover:bg-gold-light transition-all"
+            disabled={isSaving}
+            className="w-full bg-gold text-navy py-3 rounded-full font-semibold hover:bg-gold-light transition-all disabled:opacity-70 flex items-center justify-center gap-2"
           >
-            Save Changes
+            {isSaving ? <Loader2 size={18} className="animate-spin" /> : null}
+            {isSaving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       </div>

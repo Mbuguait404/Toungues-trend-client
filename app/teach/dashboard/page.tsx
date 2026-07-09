@@ -1,40 +1,33 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
-import { Users, Calendar, FileText, TrendingUp, Upload, ChevronRight } from 'lucide-react'
-import { useState } from 'react'
+import { Users, Calendar, FileText, TrendingUp, ChevronRight, Loader2, AlertCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { getTeacherSessions, getMyLearners, getMyMaterials } from '@/lib/api/teacher'
+import type { Session, TeacherLearner } from '@/lib/api/teacher'
+import { useAuth } from '@/context/AuthContext'
 
 export default function TeachDashboard() {
-  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const { user } = useAuth()
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [learners, setLearners] = useState<TeacherLearner[]>([])
+  const [materialsCount, setMaterialsCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const stats = [
-    { label: 'Active Learners', value: '24', icon: Users, color: 'bg-blue-50' },
-    { label: 'Sessions This Week', value: '12', icon: Calendar, color: 'bg-purple-50' },
-    { label: 'Materials Uploaded', value: '38', icon: FileText, color: 'bg-green-50' },
-    { label: 'Avg. Learner Progress', value: '68%', icon: TrendingUp, color: 'bg-orange-50' },
-  ]
+  useEffect(() => {
+    Promise.all([getTeacherSessions(), getMyLearners(), getMyMaterials()])
+      .then(([sess, lrns, mats]) => {
+        setSessions(sess)
+        setLearners(lrns)
+        setMaterialsCount(mats.length)
+      })
+      .catch((err) => setError(err?.message ?? 'Failed to load dashboard data'))
+      .finally(() => setIsLoading(false))
+  }, [])
 
-  const todaySessions = [
-    { learnerName: 'Amara K.', language: 'French', level: 'B1', time: '10:00 AM', id: 1 },
-    { learnerName: 'Marco R.', language: 'English', level: 'A2', time: '11:30 AM', id: 2 },
-    { learnerName: 'Sophie L.', language: 'German', level: 'B2', time: '2:00 PM', id: 3 },
-  ]
-
-  const topLearners = [
-    { name: 'Amara K.', course: 'French (B1)', progress: 75, lastActive: '2 days ago' },
-    { name: 'Marco R.', course: 'English (A2)', progress: 45, lastActive: '1 hour ago' },
-    { name: 'Sophie L.', course: 'German (B2)', progress: 82, lastActive: '5 hours ago' },
-    { name: 'Yuki T.', course: 'Kiswahili (A1)', progress: 28, lastActive: '3 days ago' },
-    { name: 'Hassan M.', course: 'French (B1)', progress: 61, lastActive: '1 day ago' },
-  ]
-
-  const handleFileUpload = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    const files = e.dataTransfer.files
-    if (files.length > 0) {
-      setUploadFile(files[0])
-    }
-  }
+  const upcomingSessions = sessions.filter((s) => s.status === 'UPCOMING')
+  const firstName = user?.name?.split(' ')[0] ?? 'there'
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -44,184 +37,115 @@ export default function TeachDashboard() {
           {/* Welcome Banner */}
           <div className="bg-navy rounded-2xl p-8 text-white">
             <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
-              Welcome, Sarah M.
+              Welcome, {firstName}
             </h2>
             <p className="text-gray-300">
-              You have 12 sessions scheduled this week. 3 learners need attention on their recent assignments.
+              You have {upcomingSessions.length} upcoming session{upcomingSessions.length !== 1 ? 's' : ''}.
             </p>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, idx) => {
-              const Icon = stat.icon
-              return (
-                <div key={idx} className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
-                  <div className={`${stat.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
-                    <Icon size={24} className="text-navy" />
-                  </div>
-                  <p className="text-gray-600 text-sm mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
-                    {stat.value}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Today's Sessions */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
-                Today's Sessions
-              </h3>
-              <div className="space-y-3">
-                {todaySessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gold-50 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="font-semibold text-navy" style={{ fontFamily: 'Poppins' }}>
-                        {session.learnerName}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {session.language} • {session.level}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-navy">{session.time}</span>
-                      <button className="px-4 py-2 bg-gold hover:bg-gold-light text-navy font-semibold rounded-full transition-all duration-150">
-                        Start Zoom
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16 text-gray-400">
+              <Loader2 size={32} className="animate-spin mr-3" />
+              Loading dashboard…
             </div>
-
-            {/* Quick Stats Card */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
-                Quick Stats
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Learners</p>
-                  <p className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
-                    24
-                  </p>
+          ) : error ? (
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+              <AlertCircle size={20} />
+              {error}
+            </div>
+          ) : (
+            <>
+              {/* Stats Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                  <div className="bg-blue-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <Users size={24} className="text-blue-500" />
+                  </div>
+                  <p className="text-gray-mid text-sm mb-1">Active Learners</p>
+                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{learners.length}</p>
                 </div>
-                <div className="border-t border-gray-100 pt-4">
-                  <p className="text-sm text-gray-600 mb-1">Completion Rate</p>
-                  <p className="text-2xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
-                    68%
-                  </p>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                  <div className="bg-purple-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <Calendar size={24} className="text-purple-500" />
+                  </div>
+                  <p className="text-gray-mid text-sm mb-1">Upcoming Sessions</p>
+                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{upcomingSessions.length}</p>
                 </div>
-                <div className="border-t border-gray-100 pt-4">
-                  <p className="text-sm text-gray-600 mb-1">Ratings</p>
-                  <p className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
-                    4.8/5
-                  </p>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                  <div className="bg-green-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <FileText size={24} className="text-green-500" />
+                  </div>
+                  <p className="text-gray-mid text-sm mb-1">Materials Uploaded</p>
+                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{materialsCount}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                  <div className="bg-orange-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <TrendingUp size={24} className="text-orange-500" />
+                  </div>
+                  <p className="text-gray-mid text-sm mb-1">Avg. Learner Progress</p>
+                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>—</p>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Top Learners */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
-              Top Learners
-            </h3>
-            <div className="space-y-3">
-              {topLearners.map((learner, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gold-50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold text-navy" style={{ fontFamily: 'Poppins' }}>
-                      {learner.name}
-                    </p>
-                    <p className="text-sm text-gray-600 mb-2">{learner.course}</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gold rounded-full h-2 transition-all"
-                        style={{ width: `${learner.progress}%` }}
-                      />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Upcoming Sessions List */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                  <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>Upcoming Sessions</h3>
+                  {upcomingSessions.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No upcoming sessions.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {upcomingSessions.slice(0, 5).map((s) => (
+                        <div key={s._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gold-50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <div className="bg-white w-12 h-12 rounded-full flex flex-col items-center justify-center border border-gray-200">
+                              <span className="text-xs font-bold text-navy">{new Date(s.scheduledAt).getHours()}:{new Date(s.scheduledAt).getMinutes().toString().padStart(2, '0')}</span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-navy text-sm">{s.learnerName ?? 'Learner'}</p>
+                              <p className="text-xs text-gray-500">{s.language ?? 'Course'} • {s.level ?? '-'}</p>
+                            </div>
+                          </div>
+                          <button className="text-gold font-semibold text-sm hover:text-gold-light">Join</button>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm font-semibold text-navy">{learner.progress}%</p>
-                    <p className="text-xs text-gray-600">{learner.lastActive}</p>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Quick Upload */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
-              Quick Upload
-            </h3>
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileUpload}
-              className="border-2 border-dashed border-gold rounded-lg p-8 text-center hover:bg-gold-50 transition-colors cursor-pointer"
-            >
-              {uploadFile ? (
-                <div>
-                  <p className="text-navy font-semibold mb-2">{uploadFile.name}</p>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {(uploadFile.size / 1024).toFixed(2)} KB
-                  </p>
+                {/* My Learners List */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                  <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>My Learners</h3>
+                  {learners.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No learners yet.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {learners.slice(0, 5).map((l) => (
+                        <div key={l._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm">
+                              {l.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-navy text-sm">{l.name}</p>
+                              <p className="text-xs text-gray-500">{l.course ?? 'Enrolled'}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-semibold text-navy mb-1">{l.progress ?? 0}%</p>
+                            <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-full bg-gold" style={{ width: `${l.progress ?? 0}%` }} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div>
-                  <Upload className="mx-auto text-gold mb-2" size={32} />
-                  <p className="text-navy font-semibold mb-1">Drag files here</p>
-                  <p className="text-sm text-gray-600">PDF, MP3, MP4, DOCX supported</p>
-                </div>
-              )}
-            </div>
-            {uploadFile && (
-              <div className="mt-4 space-y-3">
-                <div>
-                  <label className="block text-sm font-semibold text-navy mb-1">Title</label>
-                  <input
-                    type="text"
-                    placeholder="Material title"
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-navy mb-1">Course</label>
-                    <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold">
-                      <option>French</option>
-                      <option>English</option>
-                      <option>German</option>
-                      <option>Kiswahili</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-navy mb-1">Module</label>
-                    <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold">
-                      <option>A1</option>
-                      <option>A2</option>
-                      <option>B1</option>
-                      <option>B2</option>
-                    </select>
-                  </div>
-                </div>
-                <button className="w-full px-4 py-2 bg-gold hover:bg-gold-light text-navy font-semibold rounded-full transition-all duration-150">
-                  Upload Material
-                </button>
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

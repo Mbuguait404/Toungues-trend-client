@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useState as useStateLocal } from 'react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import { ChevronDown } from 'lucide-react'
+import { getAllCourses, type Course } from '@/lib/api/courses'
 
 const CEFR_LEVELS = [
   { level: 'A1', title: 'Beginner', description: 'Greet others, basic phrases, introduce yourself' },
@@ -14,36 +16,17 @@ const CEFR_LEVELS = [
   { level: 'C2', title: 'Mastery', description: 'Near-native fluency, cultural idioms, specialized vocabulary' },
 ]
 
-const COURSES = [
-  {
-    flag: '🇫🇷',
-    name: 'French',
-    slug: 'french',
-    description: 'Master French from beginner to advanced with our native-speaking instructors. Learn conversational skills, grammar, and cultural nuances.',
-    fullDescription: 'Our French courses are designed for learners of all ages and proficiency levels. Whether you&apos;re preparing for travel, work, or simply love the language, our certified teachers provide personalized instruction tailored to your goals.',
-  },
-  {
-    flag: '🇬🇧',
-    name: 'English',
-    slug: 'english',
-    description: 'Improve your English proficiency for business, travel, or personal growth. Focus on practical communication skills and confidence.',
-    fullDescription: 'From business English to conversational fluency, our comprehensive English program covers all aspects of language learning. Perfect for career advancement, immigration preparation, or cultural exploration.',
-  },
-  {
-    flag: '🇩🇪',
-    name: 'German',
-    slug: 'german',
-    description: 'Discover German with structured lessons. Perfect for professionals, students, and language enthusiasts at any level.',
-    fullDescription: 'German is a key language for business and culture in Europe. Our courses emphasize both written and spoken skills, with attention to pronunciation and professional communication.',
-  },
-  {
-    flag: '🇰🇪',
-    name: 'Kiswahili',
-    slug: 'kiswahili',
-    description: 'Explore East African culture through Kiswahili. Ideal for those interested in African languages and cross-cultural communication.',
-    fullDescription: 'Kiswahili is the gateway to East African culture and commerce. Our instructors, based in Kenya, provide authentic instruction and cultural context for deeper understanding.',
-  },
+// Fallback static data shown while loading or if API has no courses yet
+const STATIC_COURSES = [
+  { _id: 'french', name: 'French', language: 'French', flag: '🇫🇷', slug: 'french', description: 'Master French from beginner to advanced with our native-speaking instructors. Learn conversational skills, grammar, and cultural nuances.', isActive: true },
+  { _id: 'english', name: 'English', language: 'English', flag: '🇬🇧', slug: 'english', description: 'Improve your English proficiency for business, travel, or personal growth. Focus on practical communication skills and confidence.', isActive: true },
+  { _id: 'german', name: 'German', language: 'German', flag: '🇩🇪', slug: 'german', description: 'Discover German with structured lessons. Perfect for professionals, students, and language enthusiasts at any level.', isActive: true },
+  { _id: 'kiswahili', name: 'Kiswahili', language: 'Kiswahili', flag: '🇰🇪', slug: 'kiswahili', description: 'Explore East African culture through Kiswahili. Ideal for those interested in African languages and cross-cultural communication.', isActive: true },
 ]
+
+const FLAG_MAP: Record<string, string> = {
+  French: '🇫🇷', English: '🇬🇧', German: '🇩🇪', Kiswahili: '🇰🇪', Spanish: '🇪🇸', Italian: '🇮🇹',
+}
 
 const FAQItems = [
   {
@@ -97,6 +80,31 @@ function FAQAccordion() {
 }
 
 export default function CoursesPage() {
+  const [courses, setCourses] = useState<(typeof STATIC_COURSES[number])[]>(STATIC_COURSES)
+
+  useEffect(() => {
+    getAllCourses()
+      .then((apiCourses) => {
+        if (apiCourses.length > 0) {
+          const mapped = apiCourses
+            .filter((c) => c.isActive)
+            .map((c) => ({
+              _id: c._id,
+              name: c.name,
+              language: c.language,
+              flag: FLAG_MAP[c.language] ?? '🌐',
+              slug: c.slug ?? c.name.toLowerCase(),
+              description: c.description ?? '',
+              isActive: c.isActive,
+            }))
+          setCourses(mapped)
+        }
+      })
+      .catch(() => {
+        // keep static fallback
+      })
+  }, [])
+
   return (
     <main className="w-full bg-white">
       <Navbar />
@@ -117,7 +125,7 @@ export default function CoursesPage() {
       <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-12 lg:space-y-16">
-            {COURSES.map((course, idx) => (
+            {courses.map((course, idx) => (
               <div key={course.name}>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-8">
                   {/* Course Info */}
@@ -127,7 +135,7 @@ export default function CoursesPage() {
                       <h2 className="text-3xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                         {course.name}
                       </h2>
-                      <p className="text-gray-mid mb-6 leading-relaxed">{course.fullDescription}</p>
+                      <p className="text-gray-mid mb-6 leading-relaxed">{course.description}</p>
                       <div className="flex gap-3">
                         <a href={`/courses/${course.slug}`} className="flex-1 px-4 py-3 rounded-full bg-gold text-navy font-semibold hover:bg-gold-light transition-all duration-150 text-center" style={{ fontFamily: 'Poppins' }}>
                           Enrol Now
@@ -174,7 +182,7 @@ export default function CoursesPage() {
                 </div>
 
                 {/* Divider */}
-                {idx < COURSES.length - 1 && (
+                {idx < courses.length - 1 && (
                   <div className="h-px bg-gray-light my-8 lg:my-12"></div>
                 )}
               </div>

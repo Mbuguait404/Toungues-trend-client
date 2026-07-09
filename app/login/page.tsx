@@ -3,25 +3,36 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, User, ArrowRight } from 'lucide-react'
+import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { ApiException } from '@/lib/api'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [role, setRole] = useState<'student' | 'teacher' | 'admin'>('student')
-  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     setIsLoading(true)
 
-    // Mock API call delay
-    setTimeout(() => {
+    try {
+      const redirectPath = await login(email, password)
+      router.push(redirectPath)
+    } catch (err) {
+      if (err instanceof ApiException) {
+        setError(err.message)
+      } else {
+        setError('An unexpected error occurred. Please try again.')
+      }
+    } finally {
       setIsLoading(false)
-      // Redirect based on selected role
-      if (role === 'admin') router.push('/admin/dashboard')
-      else if (role === 'teacher') router.push('/teach/dashboard')
-      else router.push('/learn/dashboard')
-    }, 1000)
+    }
   }
 
   return (
@@ -29,7 +40,7 @@ export default function LoginPage() {
       {/* Background decorations */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[120px]" />
-      
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <Link href="/" className="flex justify-center mb-6">
           <img src="/logo.png" alt="Tongues Trend" className="h-10" />
@@ -45,6 +56,14 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
           <form className="space-y-6" onSubmit={handleLogin}>
+            {/* Error Banner */}
+            {error && (
+              <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
@@ -59,6 +78,8 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-white/50 focus:bg-white"
                   placeholder="you@example.com"
                 />
@@ -79,33 +100,11 @@ export default function LoginPage() {
                   type="password"
                   autoComplete="current-password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-white/50 focus:bg-white"
                   placeholder="••••••••"
                 />
-              </div>
-            </div>
-
-            {/* Mock Role Selector for demonstration */}
-            <div className="pt-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-500" />
-                Login as (Demo Purposes)
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['student', 'teacher', 'admin'] as const).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(r)}
-                    className={`py-2 px-3 text-xs font-medium rounded-lg capitalize transition-all ${
-                      role === r 
-                        ? 'bg-primary text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -154,7 +153,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white/80 text-gray-500">
-                  Don't have an account?
+                  Don&apos;t have an account?
                 </span>
               </div>
             </div>

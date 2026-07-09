@@ -3,6 +3,7 @@ import Hero from '@/components/hero'
 import HowItWorks from '@/components/how-it-works'
 import LanguageCards from '@/components/language-cards'
 import WhyTonguesTrend from '@/components/why-tongues-trend'
+import TutorsSection from '@/components/tutors-section'
 import PricingPreview from '@/components/pricing-preview'
 import Testimonials from '@/components/testimonials'
 import CTABanner from '@/components/cta-banner'
@@ -16,6 +17,7 @@ export default function Home() {
       <HowItWorks />
       <LanguageCards />
       <WhyTonguesTrend />
+      <TutorsSection />
       <PricingPreview />
       <Testimonials />
       <CTABanner />
