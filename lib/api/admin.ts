@@ -10,6 +10,14 @@ export function getAllUsers(query?: Record<string, string>): Promise<AuthUser[]>
   return apiFetch<AuthUser[]>(`/users${qs}`, { auth: true })
 }
 
+export function getUserById(id: string): Promise<AuthUser> {
+  return apiFetch<AuthUser>(`/users/${id}`, { auth: true })
+}
+
+export function createUser(data: Partial<AuthUser> & { password?: string }): Promise<AuthUser> {
+  return apiFetch<AuthUser>('/users', { method: 'POST', body: data, auth: true })
+}
+
 export function updateUserRole(id: string, role: string): Promise<AuthUser> {
   return apiFetch<AuthUser>(`/users/${id}/role`, { method: 'PATCH', body: { role }, auth: true })
 }

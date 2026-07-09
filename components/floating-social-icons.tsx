@@ -24,7 +24,7 @@ export default function FloatingSocialIcons() {
   const socialLinks = [
     {
       name: 'Instagram',
-      url: 'https://www.instagram.com/tonguestrend',
+      url: 'https://www.instagram.com/tonguestrend?igsh=MXduYnowOWVmb3Fvaw==',
       color: 'from-pink-500 via-red-500 to-yellow-500', // Multi-stop gradient matching IG branding
       svg: (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -34,7 +34,7 @@ export default function FloatingSocialIcons() {
     },
     {
       name: 'TikTok',
-      url: 'https://www.tiktok.com/@tonguestrend',
+      url: 'https://www.tiktok.com/@tonguestrend?_r=1&_t=ZN-97q3LvhJ6YB',
       color: 'from-gray-900 to-black border border-gray-800',
       svg: (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -44,7 +44,7 @@ export default function FloatingSocialIcons() {
     },
     {
       name: 'Facebook',
-      url: 'https://www.facebook.com/tonguestrend',
+      url: 'https://www.facebook.com/share/1YL4CrXfLv/?mibextid=wwXIfr',
       color: 'from-blue-600 to-blue-700',
       svg: (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -64,7 +64,7 @@ export default function FloatingSocialIcons() {
     },
     {
       name: 'LinkedIn',
-      url: 'https://www.linkedin.com/company/tonguestrend',
+      url: 'https://www.linkedin.com/in/tongue-strend-013789420?utm_source=share_via&utm_content=profile&utm_medium=member_ios',
       color: 'from-blue-700 to-sky-800',
       svg: (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">

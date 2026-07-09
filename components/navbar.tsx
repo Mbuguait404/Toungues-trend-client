@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, ChevronRight } from 'lucide-react'
+import { Menu, X, ChevronRight, User } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { roleToPath } from '@/lib/auth'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { user, logout } = useAuth()
 
   // Handle scroll effect for dynamic styling
   useEffect(() => {
@@ -73,24 +76,56 @@ export default function Navbar() {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/login"
-              className={`text-sm font-medium transition-colors ${
-                scrolled ? 'text-gray-600 hover:text-primary' : 'text-white/80 hover:text-white'
-              }`}
-              style={{ fontFamily: 'Poppins' }}
-            >
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className={`text-sm font-semibold transition-colors ${
-                scrolled ? 'text-gray-700 hover:text-primary' : 'text-white/90 hover:text-white'
-              }`}
-              style={{ fontFamily: 'Poppins' }}
-            >
-              Register Now
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href={roleToPath(user.role)}
+                  className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                    scrolled ? 'text-gray-600 hover:text-primary' : 'text-white/80 hover:text-white'
+                  }`}
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  {user.avatarUrl ? (
+                    <Image src={user.avatarUrl} alt={user.name} width={32} height={32} className="rounded-full" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                      <User size={16} className="text-gray-500" />
+                    </div>
+                  )}
+                  <span>Dashboard</span>
+                </Link>
+                <button
+                  onClick={() => logout()}
+                  className={`text-sm font-semibold transition-colors ${
+                    scrolled ? 'text-gray-700 hover:text-primary' : 'text-white/90 hover:text-white'
+                  }`}
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className={`text-sm font-medium transition-colors ${
+                    scrolled ? 'text-gray-600 hover:text-primary' : 'text-white/80 hover:text-white'
+                  }`}
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className={`text-sm font-semibold transition-colors ${
+                    scrolled ? 'text-gray-700 hover:text-primary' : 'text-white/90 hover:text-white'
+                  }`}
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Register Now
+                </Link>
+              </>
+            )}
             <button
               className="group relative px-6 py-2.5 rounded-full font-semibold text-sm overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
               style={{ fontFamily: 'Poppins' }}
@@ -145,20 +180,46 @@ export default function Navbar() {
           ))}
           <div className="h-px bg-gray-100 my-2" />
           <div className="flex flex-col gap-2">
-            <Link
-              href="/login"
-              className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-              style={{ fontFamily: 'Poppins' }}
-            >
-              Log in
-            </Link>
-            <Link
-              href="/register"
-              className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-secondary text-secondary hover:bg-secondary/10 transition-colors"
-              style={{ fontFamily: 'Poppins' }}
-            >
-              Register Now
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href={roleToPath(user.role)}
+                  className="w-full flex items-center justify-center gap-2 relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                  style={{ fontFamily: 'Poppins' }}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User size={18} />
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    logout()
+                    setIsOpen(false)
+                  }}
+                  className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-secondary text-secondary hover:bg-secondary/10 transition-colors"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/register"
+                  className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-secondary text-secondary hover:bg-secondary/10 transition-colors"
+                  style={{ fontFamily: 'Poppins' }}
+                >
+                  Register Now
+                </Link>
+              </>
+            )}
             <button
               className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm overflow-hidden flex items-center justify-center gap-2 group"
               style={{ fontFamily: 'Poppins' }}

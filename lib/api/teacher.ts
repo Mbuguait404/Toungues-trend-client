@@ -32,6 +32,15 @@ export function uploadMaterial(formData: FormData): Promise<Material> {
   })
 }
 
+/** Upload a YouTube link as material */
+export function uploadYoutubeMaterial(title: string, youtubeUrl: string): Promise<Material> {
+  return apiFetch<Material>('/materials', {
+    method: 'POST',
+    body: { title, youtubeUrl },
+    auth: true,
+  })
+}
+
 /** Get materials uploaded by the logged-in teacher */
 export function getMyMaterials(): Promise<Material[]> {
   return apiFetch<Material[]>('/materials/my', { auth: true })

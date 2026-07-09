@@ -35,6 +35,22 @@ const tutors = [
     tagColor: 'bg-gold/10 text-[#c17c00]',
     hasMaterials: false,
   },
+  {
+    id: 3,
+    initials: 'SN',
+    name: 'Samson Namusya',
+    title: 'German & Languages Tutor',
+    experience: '5 Years Experience',
+    bio: 'I am a degree holder with 5 years of experience teaching German and a Goethe-certified tutor. I am passionate about helping students build confidence and achieve their language goals through engaging, practical, and effective teaching methods.',
+    languages: ['German', 'IELTS', 'English', 'Kiswahili'],
+    availability: [
+      { day: 'Daily', time: '8:00 AM – 10:00 PM' },
+    ],
+    color: 'from-[#059669] to-[#34d399]',
+    accentColor: 'bg-[#059669]',
+    tagColor: 'bg-[#059669]/10 text-[#059669]',
+    hasMaterials: true,
+  },
 ]
 
 export default function TutorsSection() {
@@ -55,7 +71,7 @@ export default function TutorsSection() {
         </div>
 
         {/* Tutors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-12">
           {tutors.map((tutor) => (
             <div
               key={tutor.id}

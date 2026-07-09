@@ -72,6 +72,35 @@ const tutors = [
     tagText: 'text-[#c17c00]',
     borderHover: 'hover:border-gold',
   },
+  {
+    id: 3,
+    initials: 'SN',
+    name: 'Samson Namusya',
+    title: 'German & Languages Tutor',
+    experience: '5 Years',
+    qualification: 'Degree Holder & Goethe-certified Tutor',
+    bio: [
+      'I am a degree holder with 5 years of experience teaching German and a Goethe-certified tutor.',
+      'I am passionate about helping students build confidence and achieve their language goals through engaging, practical, and effective teaching methods.'
+    ],
+    languages: ['German', 'IELTS', 'English', 'Kiswahili'],
+    availability: [
+      { day: 'Daily', time: '8:00 AM – 10:00 PM' },
+    ],
+    highlights: [
+      'Engaging & practical methods',
+      'Goethe-certified instruction',
+      'Sicher & Menschen materials',
+      'ÖSD & YELX prep resources'
+    ],
+    hasMaterials: true,
+    rating: 4.9,
+    reviewCount: 32,
+    gradient: 'from-[#059669] to-[#34d399]',
+    tagBg: 'bg-[#059669]/10',
+    tagText: 'text-[#059669]',
+    borderHover: 'hover:border-[#059669]',
+  },
 ]
 
 export default function TutorsPage() {
@@ -122,8 +151,8 @@ export default function TutorsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: '2', label: 'Expert Tutors' },
-              { value: '13+', label: 'Combined Years' },
+              { value: '3', label: 'Expert Tutors' },
+              { value: '18+', label: 'Combined Years' },
               { value: '4+', label: 'Subjects Taught' },
               { value: '41+', label: 'Student Reviews' },
             ].map((stat) => (

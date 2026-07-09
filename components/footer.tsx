@@ -108,7 +108,7 @@ export default function Footer() {
           {/* Social Icons */}
           <div className="flex justify-start gap-3 mb-6">
             <a
-              href="https://www.instagram.com/tonguestrend"
+              href="https://www.instagram.com/tonguestrend?igsh=MXduYnowOWVmb3Fvaw=="
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-full bg-gray-800 hover:bg-gold hover:text-navy transition-all duration-300 hover:scale-110"
@@ -117,7 +117,7 @@ export default function Footer() {
               <Globe size={20} />
             </a>
             <a
-              href="https://www.tiktok.com/@tonguestrend"
+              href="https://www.tiktok.com/@tonguestrend?_r=1&_t=ZN-97q3LvhJ6YB"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-full bg-gray-800 hover:bg-gold hover:text-navy transition-all duration-300 hover:scale-110"
@@ -126,7 +126,7 @@ export default function Footer() {
               <Music size={20} />
             </a>
             <a
-              href="https://www.facebook.com/tonguestrend"
+              href="https://www.facebook.com/share/1YL4CrXfLv/?mibextid=wwXIfr"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-full bg-gray-800 hover:bg-gold hover:text-navy transition-all duration-300 hover:scale-110"
@@ -144,7 +144,7 @@ export default function Footer() {
               <MessagesSquare size={20} />
             </a>
             <a
-              href="https://www.linkedin.com/company/tonguestrend"
+              href="https://www.linkedin.com/in/tongue-strend-013789420?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-full bg-gray-800 hover:bg-gold hover:text-navy transition-all duration-300 hover:scale-110"
