@@ -11,9 +11,12 @@ export interface Material {
   createdAt: string
 }
 
-export function getMaterials(courseId?: string): Promise<Material[]> {
-  const qs = courseId ? `?courseId=${courseId}` : ''
-  return apiFetch<Material[]>(`/materials${qs}`, { auth: true })
+export function getMaterials(courseId?: string, moduleId?: string): Promise<Material[]> {
+  const params = new URLSearchParams()
+  if (courseId) params.set('courseId', courseId)
+  if (moduleId) params.set('moduleId', moduleId)
+  const qs = params.toString()
+  return apiFetch<Material[]>(`/materials${qs ? `?${qs}` : ''}`, { auth: true })
 }
 
 export function uploadMaterial(formData: FormData): Promise<Material> {

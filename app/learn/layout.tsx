@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import LearnSidebar from '@/components/learn-sidebar'
 
 export const metadata = {
@@ -14,7 +15,7 @@ export default function LearnLayout({
     <div className="flex h-screen bg-gray-light">
       <LearnSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        {children}
+        <Suspense fallback={null}>{children}</Suspense>
       </div>
     </div>
   )

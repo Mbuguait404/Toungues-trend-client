@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import LearnTopbar from '@/components/learn-topbar'
 import { BookOpen, CheckCircle2, Clock, Award, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import { getMyEnrollments, type Enrollment } from '@/lib/api/enrollments'
+import { getMyEnrollments, getEnrollmentCourseName, type Enrollment } from '@/lib/api/enrollments'
 import { getMySessions, type Session } from '@/lib/api/sessions'
 import { getMaterials, type Material } from '@/lib/api/materials'
 import { getMyCertificates } from '@/lib/api/certificates'
@@ -140,7 +140,7 @@ export default function DashboardPage() {
                     return (
                       <div key={e._id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all">
                         <h4 className="text-lg font-bold text-navy mb-1">
-                          {e.language ?? e.courseName ?? 'Course'}
+                          {getEnrollmentCourseName(e)}
                         </h4>
                         <p className="text-sm text-gray-600 mb-4">{e.level ?? '—'}</p>
 
@@ -160,7 +160,10 @@ export default function DashboardPage() {
                         {total > 0 && (
                           <p className="text-xs text-gray-500 mb-4">{done}/{total} modules completed</p>
                         )}
-                        <button className="w-full bg-gold text-navy py-2 rounded-full font-semibold text-sm hover:bg-gold-light transition-all duration-150">
+                        <button
+                          onClick={() => window.location.href = `/learn/enrollments/${e._id}`}
+                          className="w-full bg-gold text-navy py-2 rounded-full font-semibold text-sm hover:bg-gold-light transition-all duration-150"
+                        >
                           Continue
                         </button>
                       </div>

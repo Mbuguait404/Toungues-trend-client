@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight, AlertCircle } from 'lucide-react'
+import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight, AlertCircle, Loader2 } from 'lucide-react'
 import { register as apiRegister } from '@/lib/auth'
 import { ApiException } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 
-export default function StudentRegisterPage() {
+function RegisterContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect')
+
   const { refresh } = useAuth()
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
@@ -38,8 +41,8 @@ export default function StudentRegisterPage() {
         email: formData.email,
         password: formData.password,
       })
-      await refresh() // sync AuthContext with the new session
-      router.push('/learn/dashboard')
+      await refresh()
+      router.push(redirectTo || '/learn/dashboard')
     } catch (err) {
       if (err instanceof ApiException) {
         setError(err.message)
@@ -56,7 +59,6 @@ export default function StudentRegisterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[120px]" />
 
@@ -75,7 +77,6 @@ export default function StudentRegisterPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
 
-          {/* Step Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between relative">
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0" />
@@ -96,7 +97,6 @@ export default function StudentRegisterPage() {
             </div>
           </div>
 
-          {/* Error Banner */}
           {error && (
             <div className="flex items-center gap-3 p-3 mb-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
               <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -268,7 +268,7 @@ export default function StudentRegisterPage() {
 
             <div className="mt-6 text-center">
               <Link
-                href="/login"
+                href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'}
                 className="font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Sign in to your account
@@ -278,5 +278,17 @@ export default function StudentRegisterPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-gray-400" />
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   )
 }

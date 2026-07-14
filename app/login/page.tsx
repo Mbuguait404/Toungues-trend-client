@@ -1,14 +1,17 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react'
+import { Lock, Mail, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { ApiException } from '@/lib/api'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect')
+
   const { login } = useAuth()
 
   const [email, setEmail] = useState('')
@@ -22,8 +25,8 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const redirectPath = await login(email, password)
-      router.push(redirectPath)
+      const defaultPath = await login(email, password)
+      router.push(redirectTo || defaultPath)
     } catch (err) {
       if (err instanceof ApiException) {
         setError(err.message)
@@ -37,7 +40,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[120px]" />
 
@@ -56,7 +58,6 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
           <form className="space-y-6" onSubmit={handleLogin}>
-            {/* Error Banner */}
             {error && (
               <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -153,14 +154,14 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white/80 text-gray-500">
-                  Don&apos;t have an account?
+                  Don't have an account?
                 </span>
               </div>
             </div>
 
             <div className="mt-6 text-center">
               <Link
-                href="/register"
+                href={redirectTo ? `/register?redirect=${encodeURIComponent(redirectTo)}` : '/register'}
                 className="font-medium text-secondary hover:text-secondary/80 transition-colors"
               >
                 Register as a Student
@@ -170,5 +171,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-gray-400" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

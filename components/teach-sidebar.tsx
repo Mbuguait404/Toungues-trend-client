@@ -1,12 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Users, FileText, Calendar, LogOut } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
+
+const ROLE_LABELS: Record<string, string> = { LEARNER: 'Learner', TEACHER: 'Teacher', ADMIN: 'Admin' }
+
+function getInitials(name: string): string {
+  return name.split(' ').map(n => n[0]).filter(Boolean).join('').toUpperCase().slice(0, 2) || '?'
+}
 
 export default function TeachSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, logout } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
 
   const navItems = [
@@ -18,9 +27,13 @@ export default function TeachSidebar() {
 
   const isActive = (href: string) => pathname.startsWith(href)
 
+  const handleLogout = async () => {
+    await logout()
+    router.push('/')
+  }
+
   return (
     <>
-      {/* Mobile toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-40 md:hidden p-3 bg-gold rounded-full text-navy shadow-lg hover:bg-gold-light transition-all duration-150"
@@ -28,21 +41,18 @@ export default function TeachSidebar() {
         {isOpen ? <LogOut size={24} /> : <LayoutDashboard size={24} />}
       </button>
 
-      {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-screen w-64 bg-navy text-white z-30 transition-transform duration-300 md:relative md:z-10 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <div className="flex flex-col h-full p-6">
-          {/* Logo */}
           <Link href="/teach/dashboard" className="mb-8">
             <span className="text-xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
               TT Teach
             </span>
           </Link>
 
-          {/* Nav Items */}
           <nav className="flex-1 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon
@@ -65,31 +75,31 @@ export default function TeachSidebar() {
             })}
           </nav>
 
-          {/* User Section */}
-          <div className="border-t border-gray-700 pt-4 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-navy font-bold text-sm">
-                SM
+          {user && (
+            <div className="border-t border-gray-700 pt-4 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-navy font-bold text-sm">
+                  {getInitials(user.name)}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins' }}>
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-400">{ROLE_LABELS[user.role] ?? user.role}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins' }}>
-                  Sarah M.
-                </p>
-                <p className="text-xs text-gray-400">Teacher</p>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-gray-300 text-sm hover:text-gold transition-colors"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
             </div>
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-gray-300 text-sm hover:text-gold transition-colors"
-            >
-              <LogOut size={16} />
-              <span>Logout</span>
-            </Link>
-          </div>
+          )}
         </div>
       </aside>
 
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-20 md:hidden"

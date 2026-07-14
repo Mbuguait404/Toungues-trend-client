@@ -126,17 +126,18 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-            <button
-              className="group relative px-6 py-2.5 rounded-full font-semibold text-sm overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+            <Link
+              href="/courses"
+              className="group relative px-6 py-2.5 rounded-full font-semibold text-sm overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center"
               style={{ fontFamily: 'Poppins' }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-secondary to-[#FDC76F] transition-transform duration-300 group-hover:scale-105" />
               <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent transition-opacity duration-300" />
               <span className="relative flex items-center gap-2 text-primary">
-                Book Consultation
+                Enrol Now
                 <ChevronRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
               </span>
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -220,15 +221,17 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-            <button
+            <Link
+              href="/courses"
               className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm overflow-hidden flex items-center justify-center gap-2 group"
               style={{ fontFamily: 'Poppins' }}
+              onClick={() => setIsOpen(false)}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-secondary to-[#FDC76F]" />
               <span className="relative flex items-center gap-2 text-primary">
-                Book Free Consultation
+                Enrol Now
               </span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

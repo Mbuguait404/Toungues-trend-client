@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import LearnTopbar from '@/components/learn-topbar'
 import Link from 'next/link'
 import { Lock, CheckCircle2, Play, BookOpen, Loader2, AlertCircle } from 'lucide-react'
-import { getMyEnrollments, type Enrollment } from '@/lib/api/enrollments'
+import { getMyEnrollments, getEnrollmentCourseName, getEnrollmentLanguage, type Enrollment } from '@/lib/api/enrollments'
 import { ApiException } from '@/lib/api'
 
 function getStatusBadge(progress: number, total: number, done: number) {
@@ -61,7 +61,7 @@ export default function CoursesPage() {
               <div key={enrollment._id}>
                 <div className="mb-4">
                   <h2 className="text-2xl font-bold text-navy mb-1">
-                    {enrollment.language ?? enrollment.courseName ?? 'Course'}
+                    {getEnrollmentCourseName(enrollment)}
                   </h2>
                   {enrollment.level && (
                     <p className="text-sm text-gray-600">
@@ -82,7 +82,7 @@ export default function CoursesPage() {
 
                 <div className="space-y-2">
                   <Link
-                    href={`/learn/modules?enrollmentId=${enrollment._id}`}
+                    href={`/learn/enrollments/${enrollment._id}`}
                     className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gold hover:shadow-sm transition-all flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-4 flex-1">
@@ -91,7 +91,7 @@ export default function CoursesPage() {
                       </div>
                       <div>
                         <p className="font-medium text-navy text-sm">
-                          {enrollment.language ?? enrollment.courseName}
+                          {getEnrollmentCourseName(enrollment)}
                         </p>
                         <p className="text-xs text-gray-500">{enrollment.level ?? 'View modules'}</p>
                       </div>
