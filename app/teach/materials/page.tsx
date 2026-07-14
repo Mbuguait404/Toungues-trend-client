@@ -1,7 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
-import { Upload, FileText, Music, Video, File, Trash2, Loader2, AlertCircle, CheckCircle2, Youtube, Link as LinkIcon } from 'lucide-react'
+import { Upload, FileText, Music, Video, File, Trash2, Loader2, AlertCircle, CheckCircle2, Play, Link as LinkIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { getMyMaterials, uploadMaterial, uploadYoutubeMaterial } from '@/lib/api/teacher'
 import { deleteMaterial, type Material } from '@/lib/api/materials'
@@ -12,7 +12,7 @@ function getFileIcon(type: string = '') {
   if (t.includes('pdf')) return <FileText size={24} className="text-red-500" />
   if (t.includes('audio') || t.includes('mp3')) return <Music size={24} className="text-blue-500" />
   if (t.includes('video') || t.includes('mp4')) return <Video size={24} className="text-purple-500" />
-  if (t.includes('youtube')) return <Youtube size={24} className="text-red-600" />
+  if (t.includes('youtube')) return <Play size={24} className="text-red-600" />
   return <File size={24} className="text-gray-500" />
 }
 
