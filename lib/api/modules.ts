@@ -7,6 +7,13 @@ export interface CourseModule {
   level: string
   order: number
   description?: string
+  content?: string
+  objectives?: string[]
+  estimatedDuration?: number
+  prerequisiteModuleIds?: string[]
+  coverImageUrl?: string
+  notes?: string
+  isPublished?: boolean
   createdBy: string
   createdAt: string
 }
@@ -21,4 +28,23 @@ export function getModules(query?: { courseId?: string; level?: string }): Promi
 
 export function getModuleById(id: string): Promise<CourseModule> {
   return apiFetch<CourseModule>(`/modules/${id}`, { auth: true })
+}
+
+export function getModuleCount(courseId: string, level?: string): Promise<number> {
+  const params = new URLSearchParams()
+  params.set('courseId', courseId)
+  if (level) params.set('level', level)
+  return apiFetch<number>(`/modules/count?${params.toString()}`, { auth: true })
+}
+
+export function createModule(data: Partial<CourseModule>): Promise<CourseModule> {
+  return apiFetch<CourseModule>('/modules', { method: 'POST', body: data, auth: true })
+}
+
+export function updateModule(id: string, data: Partial<CourseModule>): Promise<CourseModule> {
+  return apiFetch<CourseModule>(`/modules/${id}`, { method: 'PUT', body: data, auth: true })
+}
+
+export function deleteModule(id: string): Promise<void> {
+  return apiFetch<void>(`/modules/${id}`, { method: 'DELETE', auth: true })
 }

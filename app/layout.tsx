@@ -51,7 +51,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} bg-white`}>
-      <body className="font-sans antialiased bg-white text-gray-dark">
+      <body className="font-sans antialiased bg-white text-gray-dark" suppressHydrationWarning>
         <AuthProvider>
           {children}
           <FloatingSocialIcons />

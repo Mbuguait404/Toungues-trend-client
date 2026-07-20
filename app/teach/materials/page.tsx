@@ -5,6 +5,8 @@ import { Upload, FileText, Music, Video, File, Trash2, Loader2, AlertCircle, Che
 import { useEffect, useRef, useState } from 'react'
 import { getMyMaterials, uploadMaterial, uploadYoutubeMaterial } from '@/lib/api/teacher'
 import { deleteMaterial, type Material } from '@/lib/api/materials'
+import { getAllCourses, type Course } from '@/lib/api/courses'
+import { getModules, type CourseModule } from '@/lib/api/modules'
 import { ApiException } from '@/lib/api'
 
 function getFileIcon(type: string = '') {
@@ -30,6 +32,10 @@ export default function TeachMaterials() {
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [title, setTitle] = useState('')
+  const [selectedCourseId, setSelectedCourseId] = useState('')
+  const [selectedModuleId, setSelectedModuleId] = useState('')
+  const [courses, setCourses] = useState<Course[]>([])
+  const [courseModules, setCourseModules] = useState<CourseModule[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -43,7 +49,21 @@ export default function TeachMaterials() {
       .then(setMaterials)
       .catch((err) => setLoadError(err instanceof ApiException ? err.message : 'Failed to load materials'))
       .finally(() => setIsLoading(false))
+    getAllCourses()
+      .then((cs) => setCourses(cs.filter(c => c.isActive)))
+      .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!selectedCourseId) {
+      setCourseModules([])
+      setSelectedModuleId('')
+      return
+    }
+    getModules({ courseId: selectedCourseId })
+      .then(setCourseModules)
+      .catch(() => setCourseModules([]))
+  }, [selectedCourseId])
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -73,6 +93,8 @@ export default function TeachMaterials() {
         const fd = new FormData()
         fd.append('file', uploadFile as File)
         fd.append('title', title)
+        if (selectedCourseId) fd.append('courseId', selectedCourseId)
+        if (selectedModuleId) fd.append('moduleId', selectedModuleId)
         newMaterial = await uploadMaterial(fd)
       } else {
         newMaterial = await uploadYoutubeMaterial(title, youtubeUrl)
@@ -81,6 +103,8 @@ export default function TeachMaterials() {
       setUploadFile(null)
       setYoutubeUrl('')
       setTitle('')
+      setSelectedCourseId('')
+      setSelectedModuleId('')
       setUploadSuccess(true)
       setTimeout(() => setUploadSuccess(false), 3000)
     } catch (err) {
@@ -143,7 +167,7 @@ export default function TeachMaterials() {
                   uploadMode === 'youtube' ? 'text-gold border-b-2 border-gold' : 'text-gray-500 hover:text-navy'
                 }`}
               >
-                <Youtube size={18} />
+                <Play size={18} />
                 YouTube Link
               </button>
             </div>
@@ -197,6 +221,37 @@ export default function TeachMaterials() {
 
             {(uploadFile || uploadMode === 'youtube') && (
               <div className="space-y-4 bg-gray-50 rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-navy mb-2">Course</label>
+                    <select
+                      value={selectedCourseId}
+                      onChange={(e) => setSelectedCourseId(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+                    >
+                      <option value="">— Select course —</option>
+                      {courses.map(c => (
+                        <option key={c._id} value={c._id}>{c.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-navy mb-2">Module</label>
+                    <select
+                      value={selectedModuleId}
+                      onChange={(e) => setSelectedModuleId(e.target.value)}
+                      disabled={!selectedCourseId}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold text-sm disabled:opacity-50"
+                    >
+                      <option value="">— Select module —</option>
+                      {courseModules.map(m => (
+                        <option key={m._id} value={m._id}>
+                          [{m.level}] {m.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-semibold text-navy mb-2">Material Title *</label>
                   <input

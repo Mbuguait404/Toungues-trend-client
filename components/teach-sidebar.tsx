@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Users, FileText, Calendar, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, FileText, Calendar, BookOpen, LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 
@@ -21,6 +21,7 @@ export default function TeachSidebar() {
   const navItems = [
     { href: '/teach/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/teach/learners', label: 'My Learners', icon: Users },
+    { href: '/teach/modules', label: 'Modules', icon: BookOpen },
     { href: '/teach/materials', label: 'Materials', icon: FileText },
     { href: '/teach/schedule', label: 'Schedule', icon: Calendar },
   ]

@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight, AlertCircle, Loader2 } from 'lucide-react'
+import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react'
 import { register as apiRegister } from '@/lib/auth'
 import { ApiException } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
@@ -17,11 +17,12 @@ function RegisterContent() {
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    language: 'Spanish',
+    language: 'English',
     level: 'Beginner',
   })
 
@@ -98,9 +99,9 @@ function RegisterContent() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-3 p-3 mb-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-              <span>{error}</span>
+            <div className="flex items-start gap-3 p-3 mb-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <span className="whitespace-pre-line">{error}</span>
             </div>
           )}
 
@@ -159,14 +160,24 @@ function RegisterContent() {
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     minLength={6}
                     value={formData.password}
                     onChange={(e) => updateFormData('password', e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-white/50 focus:bg-white"
+                    className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-white/50 focus:bg-white"
                     placeholder="••••••••"
                   />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -187,7 +198,7 @@ function RegisterContent() {
                   What language do you want to learn?
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {['Spanish', 'French', 'German', 'Italian', 'Japanese', 'Mandarin'].map((lang) => (
+                  {['English', 'French', 'German', 'Kiswahili'].map((lang) => (
                     <button
                       key={lang}
                       type="button"

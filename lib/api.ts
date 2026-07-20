@@ -22,6 +22,7 @@ export interface ApiError {
   message: string
   statusCode: number
   error?: string
+  errors?: string[]
 }
 
 export class ApiException extends Error {
@@ -98,7 +99,11 @@ export async function apiFetch<T = unknown>(
     let errMsg = 'An error occurred'
     try {
       const errData = await res.json()
-      errMsg = errData.message || errMsg
+      if (errData.errors && Array.isArray(errData.errors) && errData.errors.length > 0) {
+        errMsg = errData.errors.join('\n')
+      } else {
+        errMsg = errData.message || errMsg
+      }
     } catch {}
     throw new ApiException(errMsg, res.status)
   }

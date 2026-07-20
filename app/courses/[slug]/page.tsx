@@ -174,7 +174,7 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
     getAllCourses()
       .then((courses) => {
         const found = courses.find(
-          (c) => c.language.toLowerCase() === slug.toLowerCase() || c.slug === slug,
+          (c) => c.language.toLowerCase() === slug.toLowerCase(),
         )
         if (found) {
           setCourse(found)
@@ -208,8 +208,8 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
     )
   }
 
-  const displayName = course?.name ?? template.heroTitle.replace(`Learn ${template.slug.charAt(0).toUpperCase() + template.slug.slice(1)} with`, '').replace(' Tongues Trend', '')
-  const displayTitle = course ? `Learn ${course.name} with Tongues Trend` : template.heroTitle
+  const displayName = course?.title ?? template.heroTitle.replace(`Learn ${template.slug.charAt(0).toUpperCase() + template.slug.slice(1)} with`, '').replace(' Tongues Trend', '')
+  const displayTitle = course ? `Learn ${course.title} with Tongues Trend` : template.heroTitle
   const displayDescription = course?.description ?? template.intro
 
   return (

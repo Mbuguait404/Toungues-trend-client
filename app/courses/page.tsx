@@ -219,10 +219,10 @@ function CoursesContent() {
             .filter((c) => c.isActive)
             .map((c) => ({
               _id: c._id,
-              name: c.name,
+              name: c.title,
               language: c.language,
               flag: FLAG_MAP[c.language] ?? '🌐',
-              slug: c.slug ?? c.name.toLowerCase(),
+              slug: c.language.toLowerCase(),
               description: c.description ?? '',
               isActive: c.isActive,
             }))

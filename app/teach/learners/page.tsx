@@ -19,9 +19,11 @@ export default function TeachLearners() {
       .finally(() => setIsLoading(false))
   }, [])
 
-  const filtered = learners.filter((learner) => {
-    const matchesSearch = learner.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesLang = languageFilter === 'all' || learner.course?.toLowerCase() === languageFilter.toLowerCase()
+  const filtered = learners.filter((learner: any) => {
+    const name = learner.userId?.name ?? learner.name ?? ''
+    const course = learner.userId?.course ?? learner.courseId?.title ?? learner.course ?? ''
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesLang = languageFilter === 'all' || course.toLowerCase() === languageFilter.toLowerCase()
     return matchesSearch && matchesLang
   })
 
@@ -87,22 +89,22 @@ export default function TeachLearners() {
                         </td>
                       </tr>
                     ) : (
-                      filtered.map((learner, idx) => (
+                      filtered.map((learner: any, idx) => (
                         <tr key={learner._id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm">
-                                {learner.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                                {((learner.userId?.name || learner.name) || '').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                               </div>
                               <div>
-                                <p className="font-semibold text-navy text-sm">{learner.name}</p>
-                                <p className="text-xs text-gray-500">{learner.email}</p>
+                                <p className="font-semibold text-navy text-sm">{learner.userId?.name ?? learner.name}</p>
+                                <p className="text-xs text-gray-500">{learner.userId?.email ?? learner.email}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="font-medium text-navy text-sm">{learner.course ?? 'Enrolled'}</p>
-                            <p className="text-xs text-gray-500">{learner.level ?? '-'}</p>
+                            <p className="font-medium text-navy text-sm">{learner.courseId?.title ?? learner.course ?? 'Enrolled'}</p>
+                            <p className="text-xs text-gray-500">{learner.courseId?.language ?? learner.level ?? '-'}</p>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">

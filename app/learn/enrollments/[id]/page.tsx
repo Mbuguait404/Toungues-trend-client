@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import LearnTopbar from '@/components/learn-topbar'
-import { Loader2, AlertCircle, CheckCircle2, Circle, ArrowRight } from 'lucide-react'
+import { Loader2, AlertCircle, CheckCircle2, Circle, ArrowRight, Clock } from 'lucide-react'
 import { getEnrollmentById, getEnrollmentCourseName, getEnrollmentLanguage, type Enrollment } from '@/lib/api/enrollments'
 import { getModules, type CourseModule } from '@/lib/api/modules'
 import { getEnrollmentProgress, type Progress } from '@/lib/api/progress'
@@ -28,7 +28,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
         const courseId = typeof enr.courseId === 'object' ? enr.courseId._id : enr.courseId
 
         const [mods, prog] = await Promise.all([
-          getModules({ courseId }),
+          getModules({ courseId, level: enr.level }),
           getEnrollmentProgress(id),
         ])
         setModules(mods)
@@ -77,6 +77,9 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
   const language = getEnrollmentLanguage(enrollment)
   const progress = enrollment.progress ?? 0
 
+  const completedCount = modules.filter(m => progressMap[m._id]?.isCompleted).length
+  const totalModules = modules.length
+
   return (
     <>
       <LearnTopbar title={courseName} />
@@ -85,7 +88,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
           <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
             {courseName}
           </h2>
-          <div className="flex items-center gap-4 text-gray-300 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm">
             <span>{language}</span>
             <span>Level: {enrollment.level ?? 'General'}</span>
             <span>{progress}% complete</span>
@@ -93,49 +96,69 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
           <div className="mt-3 w-full h-2 bg-white/20 rounded-full overflow-hidden">
             <div className="h-full bg-gold transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
+          {totalModules > 0 && (
+            <p className="text-xs text-gray-400 mt-2">
+              {completedCount} of {totalModules} modules completed
+            </p>
+          )}
         </div>
 
-        <h3 className="text-xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
-          Course Modules
-        </h3>
-
         {modules.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 border border-gray-100 text-center text-gray-500">
-            No modules available for this course yet.
+          <div className="bg-white rounded-2xl p-8 border border-gray-100 text-center">
+            <p className="text-gray-500 text-lg font-medium mb-1">No modules available</p>
+            <p className="text-gray-400 text-sm">Modules for {enrollment.level} level will be added soon.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {modules.map((mod, idx) => {
-              const prog = progressMap[mod._id]
-              const isCompleted = prog?.isCompleted ?? false
-              return (
-                <button
-                  key={mod._id}
-                  onClick={() => router.push(`/learn/modules/${mod._id}?enrollmentId=${id}`)}
-                  className={`w-full bg-white rounded-xl p-4 border text-left transition-all hover:border-gold hover:shadow-sm flex items-center gap-4 ${
-                    isCompleted ? 'border-green-200 bg-green-50/50' : 'border-gray-100'
-                  }`}
-                >
-                  <div className="flex-shrink-0">
-                    {isCompleted ? (
-                      <CheckCircle2 size={22} className="text-green-500" />
-                    ) : (
-                      <Circle size={22} className="text-gray-300" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-navy text-sm">
-                      {idx + 1}. {mod.title}
-                    </p>
-                    {mod.description && (
-                      <p className="text-xs text-gray-500 mt-1 truncate">{mod.description}</p>
-                    )}
-                  </div>
-                  <ArrowRight size={18} className="text-gray-400 flex-shrink-0" />
-                </button>
-              )
-            })}
-          </div>
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
+                Course Modules
+              </h3>
+              <span className="text-sm text-gray-500">
+                {completedCount}/{totalModules} completed
+              </span>
+            </div>
+            <div className="space-y-3">
+              {modules.map((mod, idx) => {
+                const prog = progressMap[mod._id]
+                const isCompleted = prog?.isCompleted ?? false
+                return (
+                  <button
+                    key={mod._id}
+                    onClick={() => router.push(`/learn/modules/${mod._id}?enrollmentId=${id}`)}
+                    className={`w-full bg-white rounded-xl p-4 border text-left transition-all hover:border-gold hover:shadow-sm flex items-center gap-4 ${
+                      isCompleted ? 'border-green-200 bg-green-50/50' : 'border-gray-100'
+                    }`}
+                  >
+                    <div className="flex-shrink-0">
+                      {isCompleted ? (
+                        <CheckCircle2 size={22} className="text-green-500" />
+                      ) : (
+                        <Circle size={22} className="text-gray-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-navy text-sm">
+                        {idx + 1}. {mod.title}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1">
+                        {mod.description && (
+                          <p className="text-xs text-gray-500 truncate">{mod.description}</p>
+                        )}
+                        {mod.estimatedDuration > 0 && (
+                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                            <Clock size={12} />
+                            {mod.estimatedDuration} min
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ArrowRight size={18} className="text-gray-400 flex-shrink-0" />
+                  </button>
+                )
+              })}
+            </div>
+          </>
         )}
 
         <div className="mt-10 bg-gray-light rounded-2xl p-6 text-center">

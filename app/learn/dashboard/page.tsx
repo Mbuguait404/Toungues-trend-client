@@ -86,7 +86,7 @@ export default function DashboardPage() {
   const firstName = user?.name?.split(' ')[0] ?? 'there'
 
   const completedModules = enrollments.reduce(
-    (acc, e) => acc + (e.completedModules ?? 0),
+    (acc, e) => acc + ((e as any).completedModulesCount ?? (Array.isArray(e.completedModules) ? e.completedModules.length : 0)),
     0,
   )
 
@@ -135,8 +135,8 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {enrollments.map((e) => {
                     const progress = e.progress ?? 0
-                    const done = e.completedModules ?? 0
-                    const total = e.totalModules ?? 0
+                    const done = (e as any).completedModulesCount ?? (Array.isArray(e.completedModules) ? e.completedModules.length : 0)
+                    const total = (e as any).totalModules ?? 0
                     return (
                       <div key={e._id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all">
                         <h4 className="text-lg font-bold text-navy mb-1">

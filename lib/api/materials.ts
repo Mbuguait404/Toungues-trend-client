@@ -5,18 +5,26 @@ export interface Material {
   title: string
   fileUrl: string
   fileType: string
+  type?: string
   courseId: string
   moduleId?: string
   uploadedBy: string
+  viewCount?: number
   createdAt: string
 }
 
 export function getMaterials(courseId?: string, moduleId?: string): Promise<Material[]> {
+  if (moduleId) {
+    return apiFetch<Material[]>(`/materials/module/${moduleId}`, { auth: true })
+  }
   const params = new URLSearchParams()
   if (courseId) params.set('courseId', courseId)
-  if (moduleId) params.set('moduleId', moduleId)
   const qs = params.toString()
   return apiFetch<Material[]>(`/materials${qs ? `?${qs}` : ''}`, { auth: true })
+}
+
+export function getMaterialsByCourse(courseId: string): Promise<Material[]> {
+  return apiFetch<Material[]>(`/materials?courseId=${courseId}`, { auth: true })
 }
 
 export function uploadMaterial(formData: FormData): Promise<Material> {

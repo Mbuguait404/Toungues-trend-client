@@ -3,14 +3,24 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, ChevronRight, User } from 'lucide-react'
+import { Menu, X, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { roleToPath } from '@/lib/auth'
+
+const roleLabel: Record<string, string> = {
+  LEARNER: 'Learner',
+  TEACHER: 'Teacher',
+  ADMIN: 'Administrator',
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { user, logout } = useAuth()
+
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : ''
 
   // Handle scroll effect for dynamic styling
   useEffect(() => {
@@ -80,19 +90,26 @@ export default function Navbar() {
               <>
                 <Link
                   href={roleToPath(user.role)}
-                  className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 text-sm font-medium transition-colors ${
                     scrolled ? 'text-gray-600 hover:text-primary' : 'text-white/80 hover:text-white'
                   }`}
                   style={{ fontFamily: 'Poppins' }}
                 >
                   {user.avatarUrl ? (
-                    <Image src={user.avatarUrl} alt={user.name} width={32} height={32} className="rounded-full" />
+                    <Image src={user.avatarUrl} alt={user.name} width={36} height={36} className="rounded-full" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                      <User size={16} className="text-gray-500" />
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold ${
+                      scrolled ? 'bg-primary text-white' : 'bg-white/20 text-white'
+                    }`}>
+                      {initials}
                     </div>
                   )}
-                  <span>Dashboard</span>
+                  <div className="flex flex-col leading-tight">
+                    <span className="font-semibold">{user.name}</span>
+                    <span className={`text-xs ${
+                      scrolled ? 'text-gray-400' : 'text-white/60'
+                    }`}>{roleLabel[user.role] || user.role}</span>
+                  </div>
                 </Link>
                 <button
                   onClick={() => logout()}
@@ -185,12 +202,21 @@ export default function Navbar() {
               <>
                 <Link
                   href={roleToPath(user.role)}
-                  className="w-full flex items-center justify-center gap-2 relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-3 relative px-4 py-3 rounded-xl font-medium text-sm border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
                   style={{ fontFamily: 'Poppins' }}
                   onClick={() => setIsOpen(false)}
                 >
-                  <User size={18} />
-                  Dashboard
+                  {user.avatarUrl ? (
+                    <Image src={user.avatarUrl} alt={user.name} width={32} height={32} className="rounded-full" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="flex flex-col text-left leading-tight">
+                    <span className="font-semibold text-sm">{user.name}</span>
+                    <span className="text-xs text-gray-400">{roleLabel[user.role] || user.role}</span>
+                  </div>
                 </Link>
                 <button
                   onClick={() => {

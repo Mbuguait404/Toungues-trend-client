@@ -84,7 +84,7 @@ export default function TeachDashboard() {
                     <TrendingUp size={24} className="text-orange-500" />
                   </div>
                   <p className="text-gray-mid text-sm mb-1">Avg. Learner Progress</p>
-                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>—</p>
+                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{(learners as any).length > 0 ? Math.round((learners as any).reduce((acc: number, l: any) => acc + (l.progress ?? 0), 0) / (learners as any).length) + '%' : '—'}</p>
                 </div>
               </div>
 
@@ -121,15 +121,15 @@ export default function TeachDashboard() {
                     <p className="text-gray-500 text-sm">No learners yet.</p>
                   ) : (
                     <div className="space-y-4">
-                      {learners.slice(0, 5).map((l) => (
+                      {learners.slice(0, 5).map((l: any) => (
                         <div key={l._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm">
-                              {l.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}
+                              {((l.userId?.name || l.name) || '').split(' ').map((n: string)=>n[0]).join('').slice(0,2).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-semibold text-navy text-sm">{l.name}</p>
-                              <p className="text-xs text-gray-500">{l.course ?? 'Enrolled'}</p>
+                              <p className="font-semibold text-navy text-sm">{l.userId?.name ?? l.name}</p>
+                              <p className="text-xs text-gray-500">{l.courseId?.title ?? l.userId?.course ?? l.course ?? 'Enrolled'}</p>
                             </div>
                           </div>
                           <div className="text-right">
