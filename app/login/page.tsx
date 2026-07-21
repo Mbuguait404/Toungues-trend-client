@@ -10,7 +10,7 @@ import { ApiException } from '@/lib/api'
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect')
+  const redirectTo = searchParams.get('redirect') ?? searchParams.get('next')
 
   const { login } = useAuth()
 

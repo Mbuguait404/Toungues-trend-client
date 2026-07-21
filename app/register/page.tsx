@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext'
 function RegisterContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirect')
+  const redirectTo = searchParams.get('redirect') ?? searchParams.get('next')
 
   const { refresh } = useAuth()
   const [step, setStep] = useState(1)

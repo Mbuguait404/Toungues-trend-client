@@ -30,6 +30,7 @@ export function middleware(request: NextRequest) {
   if (!hasSession) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
+    loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
