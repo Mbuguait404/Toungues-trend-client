@@ -17,7 +17,7 @@ import {
 } from '@/lib/auth'
 
 function setRoleCookie(role: string) {
-  document.cookie = `tt_role=${role}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+  document.cookie = `tt_role=${role}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
 }
 
 function clearRoleCookie() {

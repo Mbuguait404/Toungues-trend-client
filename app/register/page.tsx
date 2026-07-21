@@ -43,7 +43,10 @@ function RegisterContent() {
         password: formData.password,
       })
       await refresh()
-      router.push(redirectTo || '/learn/dashboard')
+      const targetPath = (redirectTo && !redirectTo.startsWith('/login') && !redirectTo.startsWith('/register'))
+        ? redirectTo
+        : '/learn/dashboard'
+      router.push(targetPath)
     } catch (err) {
       if (err instanceof ApiException) {
         setError(err.message)

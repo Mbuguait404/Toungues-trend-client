@@ -24,8 +24,11 @@ export function middleware(request: NextRequest) {
 
   if (!matchedPrefix) return NextResponse.next()
 
-  // Check for refresh token cookie (set by server as httpOnly)
-  const hasSession = request.cookies.has('refresh_token')
+  // Role check via client-readable cookie set by AuthContext
+  const role = request.cookies.get('tt_role')?.value
+
+  // Check for session signal: client-domain tt_role cookie OR refresh_token cookie
+  const hasSession = request.cookies.has('refresh_token') || !!role
 
   if (!hasSession) {
     const loginUrl = new URL('/login', request.url)
@@ -33,9 +36,6 @@ export function middleware(request: NextRequest) {
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
-
-  // Role check via client-readable cookie set by AuthContext
-  const role = request.cookies.get('tt_role')?.value
 
   if (role && !PROTECTED[matchedPrefix].includes(role)) {
     // Logged in but wrong role — redirect to their own portal

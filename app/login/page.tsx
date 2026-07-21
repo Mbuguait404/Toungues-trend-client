@@ -26,7 +26,10 @@ function LoginContent() {
 
     try {
       const defaultPath = await login(email, password)
-      router.push(redirectTo || defaultPath)
+      const targetPath = (redirectTo && !redirectTo.startsWith('/login') && !redirectTo.startsWith('/register'))
+        ? redirectTo
+        : defaultPath
+      router.push(targetPath)
     } catch (err) {
       if (err instanceof ApiException) {
         setError(err.message)
