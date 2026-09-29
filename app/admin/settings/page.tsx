@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
+import { Reveal } from '@/components/motion'
 import { ChevronDown, Eye, EyeOff, Upload } from 'lucide-react'
 
 const emailTemplates = {
@@ -63,11 +64,14 @@ export default function AdminSettings() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminTopBar title="Platform Settings" />
+      <Reveal as="div" duration={0.5} distance={16} amount={0.1}>
+        <AdminTopBar title="Platform Settings" />
+      </Reveal>
       
       <div className="flex-1 overflow-auto">
         <div className="p-8 max-w-4xl">
           {/* Tabs */}
+          <Reveal duration={0.5} distance={16} amount={0.1}>
           <div className="flex gap-0 border-b border-gray-100 mb-8">
             {tabs.map(tab => (
               <button
@@ -83,10 +87,12 @@ export default function AdminSettings() {
               </button>
             ))}
           </div>
+          </Reveal>
 
           {/* Platform Settings Tab */}
           {activeTab === 'platform' && (
             <div className="space-y-6">
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   General Settings
@@ -122,7 +128,9 @@ export default function AdminSettings() {
                   </div>
                 </div>
               </div>
+              </Reveal>
 
+              <Reveal duration={0.5} distance={16} amount={0.05} delay={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Platform Status
@@ -168,6 +176,7 @@ export default function AdminSettings() {
                   </div>
                 </div>
               </div>
+              </Reveal>
 
               <div className="flex gap-4">
                 <button className="px-8 py-3 border border-gray-100 rounded-full font-semibold text-navy hover:bg-gray-50 transition-colors">
@@ -183,6 +192,7 @@ export default function AdminSettings() {
           {/* Email Templates Tab */}
           {activeTab === 'email' && (
             <div className="space-y-6">
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Email Templates
@@ -231,12 +241,14 @@ export default function AdminSettings() {
                   </button>
                 </div>
               </div>
+              </Reveal>
             </div>
           )}
 
           {/* Certificate Branding Tab */}
           {activeTab === 'certificate' && (
             <div className="space-y-6">
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Certificate Branding
@@ -288,12 +300,14 @@ export default function AdminSettings() {
                   </button>
                 </div>
               </div>
+              </Reveal>
             </div>
           )}
 
           {/* Payment Settings Tab */}
           {activeTab === 'payments' && (
             <div className="space-y-6">
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   M-Pesa Configuration
@@ -325,7 +339,9 @@ export default function AdminSettings() {
                   </div>
                 </div>
               </div>
+              </Reveal>
 
+              <Reveal duration={0.5} distance={16} amount={0.05} delay={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Stripe Configuration
@@ -348,7 +364,9 @@ export default function AdminSettings() {
                   </div>
                 </div>
               </div>
+              </Reveal>
 
+              <Reveal duration={0.5} distance={16} amount={0.05} delay={0.1}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Supported Currencies
@@ -383,6 +401,7 @@ export default function AdminSettings() {
                   </button>
                 </div>
               </div>
+              </Reveal>
             </div>
           )}
         </div>

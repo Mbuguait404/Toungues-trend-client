@@ -9,6 +9,7 @@ import { getMySessions, type Session } from '@/lib/api/sessions'
 import { getMaterials, type Material } from '@/lib/api/materials'
 import { getMyCertificates } from '@/lib/api/certificates'
 import { ApiException } from '@/lib/api'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 function StatCard({
   label,
@@ -22,13 +23,13 @@ function StatCard({
   color: string
 }) {
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-sm transition-all">
+    <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-sm transition-all" duration={0.5}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-gray-600">{label}</span>
         <Icon size={20} className={color} />
       </div>
       <p className="text-3xl font-bold text-navy">{value}</p>
-    </div>
+    </StaggerItem>
   )
 }
 
@@ -97,12 +98,12 @@ export default function DashboardPage() {
       <LearnTopbar title="Dashboard" />
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-navy to-navy/90 rounded-2xl p-8 text-white shadow-sm">
+        <Reveal className="bg-gradient-to-r from-navy to-navy/90 rounded-2xl p-8 text-white shadow-sm" duration={0.5} distance={20}>
           <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
             Welcome back, {firstName}!
           </h2>
           <p className="text-gray-200">Continue your language learning journey. You&apos;re making great progress!</p>
-        </div>
+        </Reveal>
 
         {isLoading ? (
           <LoadingState />
@@ -111,15 +112,15 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Stagger className="grid grid-cols-1 md:grid-cols-4 gap-4" delay={0.05}>
               <StatCard label="Enrolled Courses" value={enrollments.length} icon={BookOpen} color="text-blue-500" />
               <StatCard label="Completed Modules" value={completedModules} icon={CheckCircle2} color="text-green-500" />
               <StatCard label="Upcoming Sessions" value={upcomingSessions.length} icon={Clock} color="text-orange-500" />
               <StatCard label="Certificates Earned" value={certCount} icon={Award} color="text-gold" />
-            </div>
+            </Stagger>
 
             {/* My Courses */}
-            <div>
+            <Reveal amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                 My Courses
               </h3>
@@ -171,10 +172,10 @@ export default function DashboardPage() {
                   })}
                 </div>
               )}
-            </div>
+            </Reveal>
 
             {/* Upcoming Sessions */}
-            <div>
+            <Reveal amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                 Upcoming Sessions
               </h3>
@@ -212,10 +213,10 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </Reveal>
 
             {/* Recent Materials */}
-            <div>
+            <Reveal amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                 Recent Materials
               </h3>
@@ -248,7 +249,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </Reveal>
           </>
         )}
       </div>

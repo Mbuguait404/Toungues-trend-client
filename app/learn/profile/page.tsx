@@ -22,6 +22,7 @@ import {
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch, ApiException } from '@/lib/api'
 import type { AuthUser } from '@/lib/auth'
+import { Reveal } from '@/components/motion'
 
 interface UpdateProfileDto {
   name?: string
@@ -127,7 +128,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <div className="bg-gradient-to-r from-navy to-navy/90 rounded-2xl p-8 text-white shadow-sm relative overflow-hidden">
+          <Reveal className="bg-gradient-to-r from-navy to-navy/90 rounded-2xl p-8 text-white shadow-sm relative overflow-hidden" duration={0.5} distance={20}>
             <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/5 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
             <div className="relative z-10 flex items-center gap-6">
@@ -164,11 +165,11 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <Reveal className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm" amount={0.1} duration={0.5} distance={18}>
                 <div className="flex items-center gap-2 mb-6">
                   <User size={20} className="text-gold" />
                   <h3 className="text-lg font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
@@ -248,11 +249,11 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             </div>
 
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <Reveal className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm" amount={0.1} duration={0.5} distance={18}>
                 <div className="flex items-center gap-2 mb-6">
                   <Shield size={20} className="text-gold" />
                   <h3 className="text-lg font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
@@ -278,9 +279,9 @@ export default function ProfilePage() {
                     <span className="text-sm font-semibold text-navy">{memberSince}</span>
                   </div>
                 </div>
-              </div>
+              </Reveal>
 
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <Reveal className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm" amount={0.1} duration={0.5} distance={18}>
                 <button
                   onClick={() => setShowPasswordFields(!showPasswordFields)}
                   className="w-full flex items-center justify-between cursor-pointer"
@@ -344,7 +345,7 @@ export default function ProfilePage() {
                     })}
                   </div>
                 )}
-              </div>
+              </Reveal>
 
               <button
                 onClick={handleSave}

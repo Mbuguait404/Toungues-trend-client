@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal } from '@/components/motion'
 import {
   Loader2, AlertCircle, CheckCircle2, Plus, ChevronDown, ChevronRight,
   Edit3, Trash2, BookOpen, Clock, FileText, Save, X,
@@ -188,7 +189,7 @@ export default function TeachModules() {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20}>
             <label className="block text-sm font-semibold text-navy mb-3">Select Course</label>
             <select
               value={selectedCourseId}
@@ -200,7 +201,7 @@ export default function TeachModules() {
                 <option key={c._id} value={c._id}>{c.title} ({c.language})</option>
               ))}
             </select>
-          </div>
+          </Reveal>
 
           {!selectedCourseId ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-500">
@@ -208,7 +209,7 @@ export default function TeachModules() {
               <p className="text-lg font-medium">Select a course to manage its modules</p>
             </div>
           ) : showCreateForm ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} amount={0.05}>
               <h3 className="text-lg font-bold text-navy mb-4">
                 {editingId ? 'Edit Module' : 'Create New Module'}
               </h3>
@@ -278,11 +279,11 @@ export default function TeachModules() {
                   <X size={16} /> Cancel
                 </button>
               </div>
-            </div>
+            </Reveal>
           ) : null}
 
           {selectedCourseId && !showCreateForm && (
-            <div className="space-y-6">
+            <Reveal className="space-y-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
               {CEFR_LEVELS.map((level) => {
                 const levelModules = modulesByLevel[level] || []
                 if (levelModules.length === 0) {
@@ -387,7 +388,7 @@ export default function TeachModules() {
                   </div>
                 )
               })}
-            </div>
+            </Reveal>
           )}
         </div>
       </div>

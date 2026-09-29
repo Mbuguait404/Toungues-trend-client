@@ -11,6 +11,7 @@ import { enrolInCourse } from '@/lib/api/enrollments'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { ApiException } from '@/lib/api'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 const CEFR_LEVELS = [
   { level: 'A1', title: 'Beginner', description: 'Greet others, basic phrases, introduce yourself' },
@@ -67,9 +68,9 @@ function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
-    <div className="space-y-3">
+    <Stagger className="space-y-3" stagger={0.08} amount={0.1}>
       {FAQItems.map((item, index) => (
-        <div key={index} className="border border-gray-100 rounded-xl overflow-hidden">
+        <StaggerItem key={index} className="border border-gray-100 rounded-xl overflow-hidden">
           <button
             onClick={() => setOpenIndex(openIndex === index ? null : index)}
             className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-light transition-colors bg-white"
@@ -89,9 +90,9 @@ function FAQAccordion() {
               <p className="text-gray-dark leading-relaxed">{item.answer}</p>
             </div>
           )}
-        </div>
+        </StaggerItem>
       ))}
-    </div>
+    </Stagger>
   )
 }
 
@@ -232,20 +233,26 @@ function CoursesContent() {
   useEffect(() => {
     getAllCourses()
       .then((apiCourses) => {
-        if (apiCourses.length > 0) {
-          const mapped = apiCourses
-            .filter((c) => c.isActive)
-            .map((c) => ({
-              _id: c._id,
-              name: c.title,
-              language: c.language,
-              flag: FLAG_MAP[c.language.trim().toLowerCase()] ?? FLAG_IMAGES.English,
-              slug: c.language.toLowerCase(),
-              description: c.description ?? '',
-              isActive: c.isActive,
-            }))
-          setCourses(mapped)
-        }
+        const coursesByLanguage = new Map<string, DisplayCourse>(
+          STATIC_COURSES.map((course) => [course.slug, course]),
+        )
+
+        apiCourses
+          .filter((apiCourse) => apiCourse.isActive)
+          .forEach((apiCourse) => {
+            const slug = apiCourse.language.trim().toLowerCase()
+            coursesByLanguage.set(slug, {
+              _id: apiCourse._id,
+              name: apiCourse.title,
+              language: apiCourse.language,
+              flag: FLAG_MAP[slug] ?? FLAG_IMAGES.English,
+              slug,
+              description: apiCourse.description ?? '',
+              isActive: apiCourse.isActive,
+            })
+          })
+
+        setCourses(Array.from(coursesByLanguage.values()))
       })
       .catch(() => {})
   }, [])
@@ -265,21 +272,21 @@ function CoursesContent() {
       <Navbar />
 
       <section className="w-full bg-navy text-white py-16 sm:py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Poppins' }}>
             Our Language Courses
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Comprehensive CEFR-aligned courses from beginner to advanced proficiency. Choose your language and start learning with expert instructors today.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-12 lg:space-y-16">
+          <Stagger className="space-y-12 lg:space-y-16" stagger={0.12} amount={0.05}>
             {courses.map((course, idx) => (
-              <div key={course.name}>
+              <StaggerItem key={course.name}>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-8">
                   <div className="lg:col-span-1">
                     <div className="bg-gray-light rounded-2xl p-8">
@@ -345,20 +352,20 @@ function CoursesContent() {
                 {idx < courses.length - 1 && (
                   <div className="h-px bg-gray-light my-8 lg:my-12"></div>
                 )}
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       <section className="w-full bg-gray-light py-20 sm:py-24 lg:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <Reveal className="text-center mb-16" direction="up">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Frequently Asked Questions
             </h2>
             <p className="text-lg text-gray-mid">Get answers to common questions about our courses.</p>
-          </div>
+          </Reveal>
 
           <FAQAccordion />
         </div>

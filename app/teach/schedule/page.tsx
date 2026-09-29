@@ -1,6 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal } from '@/components/motion'
 import { ChevronLeft, ChevronRight, Plus, X, Loader2, AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getTeacherSessions, addSessionNotes, type Session } from '@/lib/api/teacher'
@@ -89,7 +90,7 @@ export default function TeachSchedule() {
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6 max-w-7xl">
           {/* Week Navigation */}
-          <div className="flex items-center justify-between">
+          <Reveal className="flex items-center justify-between" direction="up" duration={0.5} distance={16}>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setCurrentWeek(new Date(currentWeek.getTime() - 7 * 86400000))}
@@ -114,7 +115,7 @@ export default function TeachSchedule() {
               <Plus size={20} />
               Set Availability
             </button>
-          </div>
+          </Reveal>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-16 text-gray-400">
@@ -131,7 +132,7 @@ export default function TeachSchedule() {
               {/* Calendar Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-3">
-                  <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                  <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.06} amount={0.05}>
                     <div className="grid grid-cols-7 gap-2">
                       {weekDates.map((date, idx) => {
                         const daySessions = getSessionsForDate(date)
@@ -154,12 +155,12 @@ export default function TeachSchedule() {
                         )
                       })}
                     </div>
-                  </div>
+                  </Reveal>
                 </div>
 
                 {/* Availability Panel */}
                 {showAvailabilityPanel && (
-                  <div className="bg-white rounded-2xl border border-gray-100 p-6 h-fit sticky top-6">
+                  <Reveal className="bg-white rounded-2xl border border-gray-100 p-6 h-fit sticky top-6" direction="up" duration={0.5} distance={16} delay={0.06}>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-bold text-navy" style={{ fontFamily: 'Poppins' }}>Set Availability</h3>
                       <button onClick={() => setShowAvailabilityPanel(false)} className="p-1 hover:bg-gray-100 rounded transition-colors">
@@ -190,12 +191,12 @@ export default function TeachSchedule() {
                     <button className="w-full mt-4 px-4 py-2 bg-gold hover:bg-gold-light text-navy font-semibold rounded-full transition-all duration-150">
                       Save Availability
                     </button>
-                  </div>
+                  </Reveal>
                 )}
               </div>
 
               {/* Upcoming Sessions */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>Upcoming Sessions</h3>
                 {upcoming.length === 0 ? (
                   <p className="text-gray-500 text-sm text-center py-6">No upcoming sessions.</p>
@@ -223,10 +224,10 @@ export default function TeachSchedule() {
                     ))}
                   </div>
                 )}
-              </div>
+              </Reveal>
 
               {/* Past Sessions */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>Past Sessions</h3>
                 {past.length === 0 ? (
                   <p className="text-gray-500 text-sm text-center py-6">No past sessions.</p>
@@ -267,7 +268,7 @@ export default function TeachSchedule() {
                     ))}
                   </div>
                 )}
-              </div>
+              </Reveal>
             </>
           )}
         </div>

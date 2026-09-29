@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 export default function PricingPreview() {
   const pricingPlans = [
@@ -34,19 +35,19 @@ export default function PricingPreview() {
     <section className="w-full bg-gray-light py-20 sm:py-24 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="text-center mb-16 sm:mb-20">
+        <Reveal className="text-center mb-16 sm:mb-20">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
             Simple, Transparent Pricing
           </h2>
           <p className="text-lg text-gray-mid max-w-2xl mx-auto">
             Quality language instruction at affordable rates. Available in EUR, CHF, USD, and KES.
           </p>
-        </div>
+        </Reveal>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 mb-12">
+        <Stagger className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 mb-12" stagger={0.12} amount={0.1}>
           {pricingPlans.map((plan) => (
-            <div
+            <StaggerItem
               key={plan.name}
               className={`rounded-2xl border p-8 lg:p-10 transition-all duration-150 ${
                 plan.highlighted
@@ -82,16 +83,16 @@ export default function PricingPreview() {
               <button className="w-full px-6 py-3 rounded-full bg-gold text-navy font-semibold hover:bg-gold-light transition-all duration-150" style={{ fontFamily: 'Poppins' }}>
                 Get Started
               </button>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
         {/* See All Plans CTA */}
-        <div className="text-center">
+        <Reveal className="text-center" delay={0.12}>
           <button className="px-8 py-3 rounded-full border-2 border-gold text-gold font-semibold hover:bg-gold hover:text-navy transition-all duration-150" style={{ fontFamily: 'Poppins' }}>
             See All Plans
           </button>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
+import { Reveal } from '@/components/motion'
 import { Search, Loader2, AlertCircle, CheckCircle2, Plus, X, Eye, EyeOff } from 'lucide-react'
 import { getAllUsers, updateUserRole, updateUserStatus, createUser } from '@/lib/api/admin'
 import type { AuthUser } from '@/lib/auth'
@@ -86,7 +87,9 @@ export default function AdminUsers() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminTopBar title="Users" />
+      <Reveal as="div" duration={0.5} distance={16} amount={0.1}>
+        <AdminTopBar title="Users" />
+      </Reveal>
       <div className="flex-1 overflow-auto p-8 space-y-6">
         {actionMsg && (
           <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
@@ -96,6 +99,7 @@ export default function AdminUsers() {
         )}
 
         {/* Filters */}
+        <Reveal duration={0.5} distance={16} amount={0.1}>
         <div className="flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-64">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -127,6 +131,7 @@ export default function AdminUsers() {
             </button>
           </div>
         </div>
+        </Reveal>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20 text-gray-400">
@@ -139,6 +144,7 @@ export default function AdminUsers() {
             {error}
           </div>
         ) : (
+          <Reveal duration={0.5} distance={16} amount={0.05}>
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <div className="p-4 border-b border-gray-100 text-sm text-gray-500">
               {filtered.length} user{filtered.length !== 1 ? 's' : ''} found
@@ -212,6 +218,7 @@ export default function AdminUsers() {
               </table>
             </div>
           </div>
+          </Reveal>
         )}
       </div>
 

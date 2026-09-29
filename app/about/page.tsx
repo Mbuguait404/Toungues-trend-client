@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import { Award, Globe, Users, Zap } from 'lucide-react'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 export default function About() {
   const values = [
@@ -27,25 +28,6 @@ export default function About() {
       icon: Zap,
       title: 'Accessible Learning',
       description: 'Flexible scheduling, affordable pricing, and premium materials make expert language training attainable for everyone.',
-    },
-  ]
-
-  const aboutImages = [
-    {
-      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_2_public.jpg',
-      alt: 'Students learning online with Tongues Trend tutors',
-    },
-    {
-      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_3_public.png',
-      alt: 'Language learning mentorship and tutoring session',
-    },
-    {
-      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_4_public.png',
-      alt: 'Tongues Trend learning support and student engagement',
-    },
-    {
-      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_5_public.webp',
-      alt: 'Interactive online language education environment',
     },
   ]
 
@@ -107,21 +89,21 @@ export default function About() {
 
       {/* Hero Section */}
       <section className="w-full bg-navy text-white py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-balance" style={{ fontFamily: 'Poppins' }}>
             Discover Our Journey and Services at Tongues Trend
           </h1>
           <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
             We began with a passion for breaking language barriers in 2025 and have grown into a platform offering personalized tutoring in French, English, German, and Kiswahili.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* Mission & Story */}
       <section className="w-full py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
+          <div className="grid gap-10 md:grid-cols-2 md:items-center lg:gap-16">
+            <Reveal direction="left">
               <h2 className="text-3xl sm:text-4xl font-bold text-navy mb-6" style={{ fontFamily: 'Poppins' }}>
                 Our Story
               </h2>
@@ -134,106 +116,92 @@ export default function About() {
               <p className="text-gray-dark leading-relaxed">
                 Whether you are learning for travel, work, school, or personal growth, every lesson is designed to help you progress at your own pace with clarity and confidence.
               </p>
-            </div>
-            <div className="space-y-4">
-              <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
-                <Image
-                  src={aboutImages[0].src}
-                  alt={aboutImages[0].alt}
-                  width={1200}
-                  height={900}
-                  className="w-full h-[360px] object-cover"
-                  priority
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {aboutImages.slice(1).map((image) => (
-                  <div key={image.src} className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={700}
-                      height={500}
-                      className="w-full h-36 object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-
+            </Reveal>
+            <Reveal direction="right">
               <div className="bg-gray-light rounded-2xl p-6 border border-gray-100">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                <Stagger className="space-y-4" stagger={0.08} amount={0.1}>
+                  <StaggerItem className="flex justify-between items-center pb-4 border-b border-gray-200">
                     <span className="text-gray-mid text-sm font-medium">Expert Teachers</span>
                     <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
                       7+
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                  </StaggerItem>
+                  <StaggerItem className="flex justify-between items-center pb-4 border-b border-gray-200">
                     <span className="text-gray-mid text-sm font-medium">Active Students</span>
                     <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
                       500+
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                  </StaggerItem>
+                  <StaggerItem className="flex justify-between items-center pb-4 border-b border-gray-200">
                     <span className="text-gray-mid text-sm font-medium">Languages Taught</span>
                     <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
                       4
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center">
+                  </StaggerItem>
+                  <StaggerItem className="flex justify-between items-center">
                     <span className="text-gray-mid text-sm font-medium">Countries Served</span>
                     <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
                       12+
                     </span>
-                  </div>
-                </div>
+                  </StaggerItem>
+                </Stagger>
               </div>
-            </div>
+            </Reveal>
           </div>
+          <Reveal className="mt-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm" amount={0.1}>
+            <Image
+              src="/images/About Us - Our Mission, Team, and Approach to Language Education/banner.jpg"
+              alt="Tongues Trend learners studying online with tutors"
+              width={1366}
+              height={420}
+              sizes="(max-width: 768px) 100vw, 1280px"
+              className="block h-auto w-full"
+              priority
+            />
+          </Reveal>
         </div>
       </section>
 
       {/* Values Section */}
       <section className="w-full bg-gray-light py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-navy text-center mb-16" style={{ fontFamily: 'Poppins' }}>
+          <Reveal as="h2" className="text-3xl sm:text-4xl font-bold text-navy text-center mb-16" style={{ fontFamily: 'Poppins' }}>
             Our Core Values
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          </Reveal>
+          <Stagger className="grid md:grid-cols-2 lg:grid-cols-4 gap-8" stagger={0.1} amount={0.1}>
             {values.map((value, index) => {
               const Icon = value.icon
               return (
-                <div
+                <StaggerItem
                   key={index}
                   className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150"
                 >
-                  <div className="mb-4 p-3 bg-gold bg-opacity-10 rounded-lg w-fit">
-                    <Icon className="text-gold" size={24} />
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-gold/15">
+                    <Icon className="text-gold" size={28} strokeWidth={1.8} />
                   </div>
                   <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>
                     {value.title}
                   </h3>
                   <p className="text-gray-dark text-sm leading-relaxed">{value.description}</p>
-                </div>
+                </StaggerItem>
               )
             })}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* Teachers Section */}
       <section className="w-full py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-navy text-center mb-4" style={{ fontFamily: 'Poppins' }}>
+          <Reveal as="h2" className="text-3xl sm:text-4xl font-bold text-navy text-center mb-4" style={{ fontFamily: 'Poppins' }}>
             Meet Our Teachers
-          </h2>
-          <p className="text-gray-mid text-center mb-16 max-w-2xl mx-auto">
+          </Reveal>
+          <Reveal as="p" className="text-gray-mid text-center mb-16 max-w-2xl mx-auto" delay={0.12}>
             Certified language professionals dedicated to your success. Each brings unique expertise, cultural insight, and a passion for teaching.
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          </Reveal>
+          <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.07} amount={0.05}>
             {teachers.map((teacher, index) => (
-              <div
+              <StaggerItem
                 key={index}
                 className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150"
               >
@@ -254,15 +222,15 @@ export default function About() {
                   <span className="font-semibold">Languages:</span> {teacher.languages}
                 </p>
                 <p className="text-sm text-gray-mid">{teacher.expertise}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="w-full bg-navy text-white py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-gold" style={{ fontFamily: 'Poppins' }}>
             Ready to Start Learning?
           </h2>
@@ -285,7 +253,7 @@ export default function About() {
               Book Free Consultation
             </button>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <Footer />

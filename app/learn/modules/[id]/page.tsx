@@ -9,6 +9,7 @@ import { getMaterials, type Material } from '@/lib/api/materials'
 import { getEnrollmentProgress, updateProgress, type Progress } from '@/lib/api/progress'
 import QuizWidget from '@/components/quiz-widget'
 import { ApiException } from '@/lib/api'
+import { Reveal } from '@/components/motion'
 
 function getFileIcon(type: string) {
   const t = type.toLowerCase()
@@ -99,7 +100,7 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
     <>
       <LearnTopbar title={mod.title} />
       <div className="flex-1 overflow-y-auto p-6 max-w-4xl">
-        <div className="bg-navy rounded-2xl p-8 text-white mb-8">
+        <Reveal className="bg-navy rounded-2xl p-8 text-white mb-8" amount={0.1} duration={0.5} distance={20}>
           <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
             {mod.title}
           </h2>
@@ -114,11 +115,11 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
           {mod.description && (
             <p className="mt-3 text-gray-300">{mod.description}</p>
           )}
-        </div>
+        </Reveal>
 
         <div className="space-y-6">
           {mod.objectives && mod.objectives.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <Reveal className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-lg font-bold text-navy mb-3 flex items-center gap-2">
                 <Target size={20} className="text-gold" />
                 Learning Objectives
@@ -133,26 +134,26 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
                   </li>
                 ))}
               </ul>
-            </div>
+            </Reveal>
           )}
 
           {mod.content && (
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <Reveal className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-lg font-bold text-navy mb-4">Lesson Content</h3>
               <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                 {mod.content}
               </div>
-            </div>
+            </Reveal>
           )}
 
           {mod.notes && (
-            <div className="bg-gold-50 rounded-2xl p-6 border border-gold/20">
+            <Reveal className="bg-gold-50 rounded-2xl p-6 border border-gold/20" amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-lg font-bold text-navy mb-3">Teacher Notes</h3>
               <p className="text-sm text-navy/80 whitespace-pre-wrap">{mod.notes}</p>
-            </div>
+            </Reveal>
           )}
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+          <Reveal className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.1} duration={0.5} distance={18}>
             <h3 className="text-lg font-bold text-navy mb-4">Learning Materials</h3>
 
             {materials.length === 0 ? (
@@ -181,12 +182,12 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
                 ))}
               </div>
             )}
-          </div>
+          </Reveal>
 
           <QuizWidget moduleId={moduleId} enrollmentId={enrollmentId ?? undefined} />
 
           {enrollmentId && (
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <Reveal className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.1} duration={0.5} distance={18}>
               <div className="flex justify-end">
                 {isCompleted ? (
                   <div className="flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 font-semibold rounded-full">
@@ -210,7 +211,7 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
                   </button>
                 )}
               </div>
-            </div>
+            </Reveal>
           )}
         </div>
       </div>

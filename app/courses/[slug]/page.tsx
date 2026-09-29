@@ -7,6 +7,7 @@ import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import { ArrowLeft, ArrowRight, GraduationCap, MessageCircle, Loader2 } from 'lucide-react'
 import { getAllCourses, type Course } from '@/lib/api/courses'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 type StaticTemplate = {
   slug: string
@@ -238,7 +239,7 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
             Back to courses
           </Link>
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
-            <div>
+            <Reveal direction="left">
               <p className="text-gold font-semibold uppercase tracking-[0.25em] text-sm mb-4">Language Course</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Poppins' }}>
                 {displayTitle}
@@ -270,37 +271,37 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
                   View Pricing
                 </Link>
               </div>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
+            </Reveal>
+            <Reveal direction="right" className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
               <img src={template.mainImage} alt={`${displayName} learning`} className="h-72 w-full rounded-2xl bg-white object-contain" />
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       <section className="w-full bg-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <Reveal className="text-center mb-12" direction="up">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               {template.whyTitle}
             </h2>
             <p className="text-lg text-gray-mid max-w-2xl mx-auto">Here's why students love learning with us.</p>
-          </div>
-          <div className="grid gap-8 md:grid-cols-3">
+          </Reveal>
+          <Stagger className="grid gap-8 md:grid-cols-3" stagger={0.12}>
             {template.highlights.map((item) => (
-              <div key={item.title} className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <StaggerItem key={item.title} className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <img src={item.image} alt={item.title} className="mx-auto mb-5 h-44 w-44 rounded-xl object-contain" />
                 <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>{item.title}</h3>
                 <p className="text-gray-mid leading-relaxed">{item.description}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       <section className="w-full bg-gray-light py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto mb-12 max-w-3xl text-center">
+          <Reveal className="mx-auto mb-12 max-w-3xl text-center" direction="up">
             <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
                 <GraduationCap size={26} />
             </div>
@@ -308,52 +309,52 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
               Course Structure ({displayName} Levels)
             </h2>
             <p className="text-gray-mid leading-relaxed">{template.structureIntro}</p>
-          </div>
-          <div className="mb-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          </Reveal>
+          <Reveal className="mb-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm" amount={0.1}>
             <img src={template.metricsImage} alt={`${displayName} course levels and progress`} className="block h-auto w-full" />
-          </div>
-          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          </Reveal>
+          <Reveal className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between" direction="up">
             <h3 className="text-2xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>Clear progress at every step</h3>
             <p className="max-w-2xl text-gray-mid leading-relaxed">Each level is designed to help learners move from simple everyday communication to confident, advanced expression, with feedback and support throughout.</p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          </Reveal>
+          <Stagger className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" stagger={0.08} amount={0.05}>
             {template.levels.map((level) => (
-              <article key={level.level} className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+              <StaggerItem as="article" key={level.level} className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex items-baseline gap-3">
                   <span className="text-xl font-bold text-navy">{level.level}</span>
                   <span className="font-semibold text-gray-dark">{level.title}</span>
                 </div>
                 <p className="text-sm leading-relaxed text-gray-mid">{level.description}</p>
-              </article>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       <section className="w-full bg-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <Reveal className="text-center mb-12" direction="up">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>{template.teachingTitle}</h2>
             <p className="text-lg text-gray-mid max-w-2xl mx-auto">{template.teachingIntro}</p>
-          </div>
-          <div className="grid gap-8 lg:grid-cols-3">
+          </Reveal>
+          <Stagger className="grid gap-8 lg:grid-cols-3" stagger={0.12}>
             {template.teachingStyles.map((item) => (
-              <div key={item.title} className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <StaggerItem key={item.title} className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div className="mb-5 flex h-48 w-full items-center justify-center overflow-hidden rounded-xl bg-gray-light p-3">
                   <img src={item.image} alt={item.title} className="h-full w-full object-contain" />
                 </div>
                 <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>{item.title}</h3>
                 <p className="text-gray-mid leading-relaxed">{item.description}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       <section className="w-full bg-navy py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
-            <div>
+            <Reveal direction="left">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
                 <MessageCircle size={24} />
               </div>
@@ -367,10 +368,10 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
                   View Pricing
                 </Link>
               </div>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
+            </Reveal>
+            <Reveal direction="right" className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
               <img src={template.ctaImage} alt={`${displayName} course call to action`} className="h-72 w-full rounded-2xl object-cover" />
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
+import { Reveal } from '@/components/motion'
 import { BookOpen, Edit, Trash2, Plus, Loader2, AlertCircle, CheckCircle2, X, Users, GraduationCap } from 'lucide-react'
 import {
   getAllCourses, getEnrollmentsByCourse, createCourse, updateCourse, deactivateCourse,
@@ -225,7 +226,9 @@ export default function AdminCourses() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminTopBar title="Courses" />
+      <Reveal as="div" duration={0.5} distance={16} amount={0.1}>
+        <AdminTopBar title="Courses" />
+      </Reveal>
       <div className="flex-1 overflow-auto p-8 space-y-6">
         {actionMsg && (
           <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
@@ -234,6 +237,7 @@ export default function AdminCourses() {
           </div>
         )}
 
+        <Reveal duration={0.5} distance={16} amount={0.1}>
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>Course Management</h2>
           <button
@@ -243,6 +247,7 @@ export default function AdminCourses() {
             <Plus size={18} /> Add Course
           </button>
         </div>
+        </Reveal>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20 text-gray-400">
@@ -266,6 +271,7 @@ export default function AdminCourses() {
             </button>
           </div>
         ) : (
+          <Reveal duration={0.5} distance={16} amount={0.05}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course) => (
               <div key={course._id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 group">
@@ -316,6 +322,7 @@ export default function AdminCourses() {
               </div>
             ))}
           </div>
+          </Reveal>
         )}
       </div>
 

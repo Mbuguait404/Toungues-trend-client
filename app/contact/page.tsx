@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import { Mail, Phone, MapPin, Clock } from 'lucide-react'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -93,14 +94,14 @@ export default function Contact() {
 
       {/* Hero Section */}
       <section className="w-full bg-navy text-white py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-balance" style={{ fontFamily: 'Poppins' }}>
             Get in Touch
           </h1>
           <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Have a question? Ready to start your language journey? We'd love to hear from you. Contact us and our team will get back to you promptly.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* Contact Section */}
@@ -109,9 +110,9 @@ export default function Contact() {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div>
-              <h2 className="text-3xl font-bold text-navy mb-8" style={{ fontFamily: 'Poppins' }}>
+              <Reveal as="h2" className="text-3xl font-bold text-navy mb-8" style={{ fontFamily: 'Poppins' }}>
                 Send us a Message
-              </h2>
+              </Reveal>
 
               {submitted ? (
                 <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
@@ -200,15 +201,15 @@ export default function Contact() {
 
             {/* Contact Info */}
             <div>
-              <h2 className="text-3xl font-bold text-navy mb-8" style={{ fontFamily: 'Poppins' }}>
+              <Reveal as="h2" className="text-3xl font-bold text-navy mb-8" style={{ fontFamily: 'Poppins' }}>
                 Contact Information
-              </h2>
+              </Reveal>
 
-              <div className="space-y-6 mb-12">
+              <Stagger className="space-y-6 mb-12" stagger={0.08} amount={0.1}>
                 {contactInfo.map((info, index) => {
                   const Icon = info.icon
                   return (
-                    <div key={index} className="flex gap-4">
+                    <StaggerItem key={index} className="flex gap-4">
                       <div className="flex-shrink-0 mt-1">
                         <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-gold bg-opacity-10">
                           <Icon className="text-gold" size={20} />
@@ -229,28 +230,28 @@ export default function Contact() {
                           <p className="text-lg font-medium text-navy">{info.value}</p>
                         )}
                       </div>
-                    </div>
+                    </StaggerItem>
                   )
                 })}
-              </div>
+              </Stagger>
 
               {/* Office Hours */}
-              <div className="bg-gray-light rounded-2xl p-8 border border-gray-100">
+              <Reveal className="bg-gray-light rounded-2xl p-8 border border-gray-100" amount={0.1}>
                 <h3 className="font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Office Hours
                 </h3>
-                <ul className="space-y-3 text-sm text-gray-dark">
-                  <li>
+                <Stagger as="ul" className="space-y-3 text-sm text-gray-dark" stagger={0.08} amount={0.1}>
+                  <StaggerItem as="li">
                     <span className="font-semibold">Monday - Friday:</span> 9:00 AM - 6:00 PM CET
-                  </li>
-                  <li>
+                  </StaggerItem>
+                  <StaggerItem as="li">
                     <span className="font-semibold">Saturday:</span> 10:00 AM - 2:00 PM CET
-                  </li>
-                  <li>
+                  </StaggerItem>
+                  <StaggerItem as="li">
                     <span className="font-semibold">Sunday:</span> Closed
-                  </li>
-                </ul>
-              </div>
+                  </StaggerItem>
+                </Stagger>
+              </Reveal>
             </div>
           </div>
         </div>
@@ -259,16 +260,16 @@ export default function Contact() {
       {/* FAQ Section */}
       <section className="w-full bg-gray-light py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-navy text-center mb-4" style={{ fontFamily: 'Poppins' }}>
+          <Reveal as="h2" className="text-3xl sm:text-4xl font-bold text-navy text-center mb-4" style={{ fontFamily: 'Poppins' }}>
             Frequently Asked Questions
-          </h2>
-          <p className="text-center text-gray-mid mb-12 max-w-2xl mx-auto">
+          </Reveal>
+          <Reveal as="p" className="text-center text-gray-mid mb-12 max-w-2xl mx-auto" delay={0.12}>
             Can't find what you're looking for? Contact us directly and we'll be happy to help.
-          </p>
+          </Reveal>
 
-          <div className="space-y-4">
+          <Stagger className="space-y-4" stagger={0.08} amount={0.1}>
             {faqItems.map((item, index) => (
-              <div key={index} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <StaggerItem key={index} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <button
                   onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
                   className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-light transition-colors"
@@ -290,15 +291,15 @@ export default function Contact() {
                     {item.answer}
                   </div>
                 )}
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* CTA Banner */}
       <section className="w-full bg-navy text-white py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-gold" style={{ fontFamily: 'Poppins' }}>
             Ready to Start Your Language Journey?
           </h2>
@@ -313,7 +314,7 @@ export default function Contact() {
               Book Free Consultation
             </button>
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       <Footer />

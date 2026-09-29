@@ -1,6 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 import { Users, Calendar, FileText, TrendingUp, ChevronRight, Loader2, AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getTeacherSessions, getMyLearners, getMyMaterials } from '@/lib/api/teacher'
@@ -35,14 +36,14 @@ export default function TeachDashboard() {
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-8 max-w-7xl">
           {/* Welcome Banner */}
-          <div className="bg-navy rounded-2xl p-8 text-white">
+          <Reveal className="bg-navy rounded-2xl p-8 text-white" direction="up" duration={0.5} distance={20}>
             <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
               Welcome, {firstName}
             </h2>
             <p className="text-gray-300">
               You have {upcomingSessions.length} upcoming session{upcomingSessions.length !== 1 ? 's' : ''}.
             </p>
-          </div>
+          </Reveal>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-16 text-gray-400">
@@ -57,40 +58,40 @@ export default function TeachDashboard() {
           ) : (
             <>
               {/* Stats Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.08} delay={0.1}>
+                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
                   <div className="bg-blue-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                     <Users size={24} className="text-blue-500" />
                   </div>
                   <p className="text-gray-mid text-sm mb-1">Active Learners</p>
                   <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{learners.length}</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                </StaggerItem>
+                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
                   <div className="bg-purple-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                     <Calendar size={24} className="text-purple-500" />
                   </div>
                   <p className="text-gray-mid text-sm mb-1">Upcoming Sessions</p>
                   <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{upcomingSessions.length}</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                </StaggerItem>
+                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
                   <div className="bg-green-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                     <FileText size={24} className="text-green-500" />
                   </div>
                   <p className="text-gray-mid text-sm mb-1">Materials Uploaded</p>
                   <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{materialsCount}</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150">
+                </StaggerItem>
+                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
                   <div className="bg-orange-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                     <TrendingUp size={24} className="text-orange-500" />
                   </div>
                   <p className="text-gray-mid text-sm mb-1">Avg. Learner Progress</p>
                   <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{(learners as any).length > 0 ? Math.round((learners as any).reduce((acc: number, l: any) => acc + (l.progress ?? 0), 0) / (learners as any).length) + '%' : '—'}</p>
-                </div>
-              </div>
+                </StaggerItem>
+              </Stagger>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-8" stagger={0.1} delay={0.15} amount={0.05}>
                 {/* Upcoming Sessions List */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <StaggerItem className="bg-white rounded-2xl border border-gray-100 p-6" duration={0.5}>
                   <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>Upcoming Sessions</h3>
                   {upcomingSessions.length === 0 ? (
                     <p className="text-gray-500 text-sm">No upcoming sessions.</p>
@@ -112,10 +113,10 @@ export default function TeachDashboard() {
                       ))}
                     </div>
                   )}
-                </div>
+                </StaggerItem>
 
                 {/* My Learners List */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <StaggerItem className="bg-white rounded-2xl border border-gray-100 p-6" duration={0.5}>
                   <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>My Learners</h3>
                   {learners.length === 0 ? (
                     <p className="text-gray-500 text-sm">No learners yet.</p>
@@ -142,8 +143,8 @@ export default function TeachDashboard() {
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
+                </StaggerItem>
+              </Stagger>
             </>
           )}
         </div>

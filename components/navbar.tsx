@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, ChevronRight } from 'lucide-react'
+import { motion, useScroll, useSpring } from 'motion/react'
+import { Menu, X, ChevronRight, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { roleToPath } from '@/lib/auth'
 
@@ -16,15 +17,41 @@ const roleLabel: Record<string, string> = {
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
   const { user, logout } = useAuth()
+  const { scrollYProgress } = useScroll()
+  const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 26, mass: 0.3 })
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
     : ''
 
-  // Handle scroll effect for dynamic styling
+  // Close the profile dropdown on outside click / Escape
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
+    if (!menuOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [menuOpen])
+
+  // Close the profile dropdown on scroll to avoid it floating away
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+      setMenuOpen(false)
+    }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -44,6 +71,10 @@ export default function Navbar() {
         scrolled ? 'pt-2' : 'pt-4'
       }`}
     >
+      <motion.div
+        className="absolute top-0 left-0 right-0 h-[3px] origin-left bg-gradient-to-r from-navy via-gold to-gold-light"
+        style={{ scaleX: progress }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           className={`flex justify-between items-center transition-all duration-300 ease-out rounded-2xl ${
@@ -54,14 +85,14 @@ export default function Navbar() {
         >
           {/* Logo */}
           <Link href="/" className="flex items-center group relative z-10">
-            <div className="relative h-9 w-[120px] overflow-hidden rounded-lg">
+            <div className="relative h-12 w-[168px] overflow-hidden rounded-lg">
               <Image 
                 src="/logo.png" 
                 alt="Tongues Trend Logo" 
                 fill
-                sizes="120px"
+                sizes="168px"
                 className={`object-contain transition-all duration-300 origin-left ${
-                  scrolled ? 'scale-75 group-hover:scale-90' : 'scale-100 group-hover:scale-105'
+                  scrolled ? 'scale-90 group-hover:scale-100' : 'scale-100 group-hover:scale-105'
                 }`} 
               />
             </div>
@@ -87,9 +118,12 @@ export default function Navbar() {
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
             {user ? (
-              <>
-                <Link
-                  href={roleToPath(user.role)}
+              <div className="relative" ref={profileRef}>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
                   className={`flex items-center gap-3 text-sm font-medium transition-colors ${
                     scrolled ? 'text-gray-600 hover:text-primary' : 'text-white/80 hover:text-white'
                   }`}
@@ -104,23 +138,50 @@ export default function Navbar() {
                       {initials}
                     </div>
                   )}
-                  <div className="flex flex-col leading-tight">
+                  <div className="flex flex-col items-start leading-tight">
                     <span className="font-semibold">{user.name}</span>
                     <span className={`text-xs ${
                       scrolled ? 'text-gray-400' : 'text-white/60'
                     }`}>{roleLabel[user.role] || user.role}</span>
                   </div>
-                </Link>
-                <button
-                  onClick={() => logout()}
-                  className={`text-sm font-semibold transition-colors ${
-                    scrolled ? 'text-gray-700 hover:text-primary' : 'text-white/90 hover:text-white'
-                  }`}
-                  style={{ fontFamily: 'Poppins' }}
-                >
-                  Log out
+                  <ChevronDown size={16} className={`transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`} />
                 </button>
-              </>
+
+                {menuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 mt-3 w-56 origin-top-right rounded-2xl bg-white/95 backdrop-blur-xl border border-gray-100 shadow-xl overflow-hidden p-1.5"
+                  >
+                    <div className="px-3 py-2.5 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                    </div>
+                    <Link
+                      href={roleToPath(user.role)}
+                      onClick={() => setMenuOpen(false)}
+                      role="menuitem"
+                      className="mt-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
+                      style={{ fontFamily: 'Poppins' }}
+                    >
+                      <LayoutDashboard size={16} />
+                      Dashboard
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        logout()
+                      }}
+                      className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                      style={{ fontFamily: 'Poppins' }}
+                    >
+                      <LogOut size={16} />
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link
@@ -143,18 +204,20 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-            <Link
-              href="/courses"
-              className="group relative px-6 py-2.5 rounded-full font-semibold text-sm overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center"
-              style={{ fontFamily: 'Poppins' }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-secondary to-[#FDC76F] transition-transform duration-300 group-hover:scale-105" />
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent transition-opacity duration-300" />
-              <span className="relative flex items-center gap-2 text-primary">
-                Enrol Now
-                <ChevronRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-            </Link>
+            {!user && (
+              <Link
+                href="/courses"
+                className="group relative px-6 py-2.5 rounded-full font-semibold text-sm overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 inline-flex items-center"
+                style={{ fontFamily: 'Poppins' }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-secondary to-[#FDC76F] transition-transform duration-300 group-hover:scale-105" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent transition-opacity duration-300" />
+                <span className="relative flex items-center gap-2 text-primary">
+                  Enrol Now
+                  <ChevronRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -199,10 +262,10 @@ export default function Navbar() {
           <div className="h-px bg-gray-100 my-2" />
           <div className="flex flex-col gap-2">
             {user ? (
-              <>
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
                 <Link
                   href={roleToPath(user.role)}
-                  className="w-full flex items-center gap-3 relative px-4 py-3 rounded-xl font-medium text-sm border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-3 relative px-4 py-3 hover:bg-gray-50 transition-colors"
                   style={{ fontFamily: 'Poppins' }}
                   onClick={() => setIsOpen(false)}
                 >
@@ -213,22 +276,24 @@ export default function Navbar() {
                       {initials}
                     </div>
                   )}
-                  <div className="flex flex-col text-left leading-tight">
-                    <span className="font-semibold text-sm">{user.name}</span>
-                    <span className="text-xs text-gray-400">{roleLabel[user.role] || user.role}</span>
+                  <div className="flex flex-col text-left leading-tight min-w-0">
+                    <span className="font-semibold text-sm truncate">{user.name}</span>
+                    <span className="text-xs text-gray-400 truncate">{roleLabel[user.role] || user.role}</span>
                   </div>
                 </Link>
                 <button
+                  type="button"
                   onClick={() => {
                     logout()
                     setIsOpen(false)
                   }}
-                  className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm text-center border border-secondary text-secondary hover:bg-secondary/10 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-red-600 border-t border-gray-100 hover:bg-red-50 transition-colors"
                   style={{ fontFamily: 'Poppins' }}
                 >
+                  <LogOut size={16} />
                   Log out
                 </button>
-              </>
+              </div>
             ) : (
               <>
                 <Link
@@ -247,17 +312,19 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-            <Link
-              href="/courses"
-              className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm overflow-hidden flex items-center justify-center gap-2 group"
-              style={{ fontFamily: 'Poppins' }}
-              onClick={() => setIsOpen(false)}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-secondary to-[#FDC76F]" />
-              <span className="relative flex items-center gap-2 text-primary">
-                Enrol Now
-              </span>
-            </Link>
+            {!user && (
+              <Link
+                href="/courses"
+                className="w-full relative px-4 py-3 rounded-xl font-semibold text-sm overflow-hidden flex items-center justify-center gap-2 group"
+                style={{ fontFamily: 'Poppins' }}
+                onClick={() => setIsOpen(false)}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-secondary to-[#FDC76F]" />
+                <span className="relative flex items-center gap-2 text-primary">
+                  Enrol Now
+                </span>
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal } from '@/components/motion'
 import { Search, Loader2, AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getMyLearners, type TeacherLearner } from '@/lib/api/teacher'
@@ -33,7 +34,7 @@ export default function TeachLearners() {
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6 max-w-7xl">
           {/* Filters */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-wrap gap-4 items-center justify-between">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-wrap gap-4 items-center justify-between" direction="up" duration={0.5} distance={16}>
             <div className="relative flex-1 min-w-64 max-w-md">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -57,7 +58,7 @@ export default function TeachLearners() {
                 <option value="kiswahili">Kiswahili</option>
               </select>
             </div>
-          </div>
+          </Reveal>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-16 text-gray-400">
@@ -70,7 +71,7 @@ export default function TeachLearners() {
               {error}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <Reveal className="bg-white rounded-2xl border border-gray-100 overflow-hidden" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -123,7 +124,7 @@ export default function TeachLearners() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </Reveal>
           )}
         </div>
       </div>

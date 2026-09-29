@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Lock, CheckCircle2, Play, BookOpen, Loader2, AlertCircle } from 'lucide-react'
 import { getMyEnrollments, getEnrollmentCourseName, getEnrollmentLanguage, type Enrollment } from '@/lib/api/enrollments'
 import { ApiException } from '@/lib/api'
+import { Reveal } from '@/components/motion'
 
 function getStatusBadge(progress: number, total: number, done: number) {
   if (done >= total && total > 0) return { bg: 'bg-green-100', text: 'text-green-700', label: 'Completed', icon: <CheckCircle2 size={16} className="text-green-600" /> }
@@ -58,7 +59,7 @@ export default function CoursesPage() {
             const badge = getStatusBadge(progress, total, done)
 
             return (
-              <div key={enrollment._id}>
+              <Reveal key={enrollment._id} amount={0.1} duration={0.5} distance={18}>
                 <div className="mb-4">
                   <h2 className="text-2xl font-bold text-navy mb-1">
                     {getEnrollmentCourseName(enrollment)}
@@ -106,7 +107,7 @@ export default function CoursesPage() {
                     </div>
                   </Link>
                 </div>
-              </div>
+              </Reveal>
             )
           })
         )}

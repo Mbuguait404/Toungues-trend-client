@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Users, DollarSign, BookOpen, TrendingUp } from 'lucide-react'
 import { ArrowUpRight, Loader2, AlertCircle } from 'lucide-react'
@@ -67,7 +68,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminTopBar title="Admin Dashboard" />
+      <Reveal as="div" duration={0.5} distance={16} amount={0.1}>
+        <AdminTopBar title="Admin Dashboard" />
+      </Reveal>
       <div className="flex-1 overflow-auto">
         <div className="p-8 space-y-8">
           {isLoading ? (
@@ -83,16 +86,29 @@ export default function AdminDashboard() {
           ) : (
             <>
               {/* KPI Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <KPICard icon={Users} label="Total Learners" value={learners.length} change={12} isPositive={true} />
-                <KPICard icon={BookOpen} label="Active Enrollments" value={learners.length} change={8} isPositive={true} />
-                <KPICard icon={Users} label="Total Teachers" value={teachers.length} change={3} isPositive={true} />
-                <KPICard icon={DollarSign} label={`Total Revenue (KES)`} value={totalRevenue.toLocaleString()} change={15} isPositive={true} />
-                <KPICard icon={TrendingUp} label="Pending Payments" value={pendingPayments.length} change={0} isPositive={false} />
-                <KPICard icon={BookOpen} label="Total Transactions" value={payments.length} change={22} isPositive={true} />
-              </div>
+              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" amount={0.1} stagger={0.06}>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <KPICard icon={Users} label="Total Learners" value={learners.length} change={12} isPositive={true} />
+                </StaggerItem>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <KPICard icon={BookOpen} label="Active Enrollments" value={learners.length} change={8} isPositive={true} />
+                </StaggerItem>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <KPICard icon={Users} label="Total Teachers" value={teachers.length} change={3} isPositive={true} />
+                </StaggerItem>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <KPICard icon={DollarSign} label={`Total Revenue (KES)`} value={totalRevenue.toLocaleString()} change={15} isPositive={true} />
+                </StaggerItem>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <KPICard icon={TrendingUp} label="Pending Payments" value={pendingPayments.length} change={0} isPositive={false} />
+                </StaggerItem>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <KPICard icon={BookOpen} label="Total Transactions" value={payments.length} change={22} isPositive={true} />
+                </StaggerItem>
+              </Stagger>
 
               {/* Revenue Chart */}
+              <Reveal duration={0.5} distance={18} amount={0.1}>
               <div className="bg-white rounded-2xl p-6 border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
@@ -126,8 +142,10 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+              </Reveal>
 
               {/* Tables Row */}
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Enrollments by Language */}
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 lg:col-span-1">
@@ -238,6 +256,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
+              </Reveal>
             </>
           )}
         </div>

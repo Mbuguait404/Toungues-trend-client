@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 import { DollarSign, Loader2, AlertCircle, X } from 'lucide-react'
 import { getAllPayments, type Payment } from '@/lib/api/admin'
 
@@ -41,7 +42,9 @@ export default function AdminPayments() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminTopBar title="Payments" />
+      <Reveal as="div" duration={0.5} distance={16} amount={0.1}>
+        <AdminTopBar title="Payments" />
+      </Reveal>
       <div className="flex-1 overflow-auto p-8 space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-20 text-gray-400">
@@ -56,27 +59,29 @@ export default function AdminPayments() {
         ) : (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6" amount={0.1} stagger={0.07}>
               {[
                 { label: 'Total Revenue', value: `KES ${totalRevenue.toLocaleString()}`, icon: DollarSign, bg: 'bg-gold/10', color: 'text-gold' },
                 { label: 'Pending', value: pendingPayments.length, icon: DollarSign, bg: 'bg-amber-100', color: 'text-amber-600' },
                 { label: 'Failed', value: failedPayments.length, icon: DollarSign, bg: 'bg-red-100', color: 'text-red-600' },
               ].map((card) => (
-                <div key={card.label} className="bg-white rounded-2xl p-6 border border-gray-100">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-gray-mid text-sm mb-1">{card.label}</p>
-                      <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
-                        {card.value}
-                      </p>
-                    </div>
-                    <div className={`w-12 h-12 ${card.bg} rounded-lg flex items-center justify-center`}>
-                      <card.icon size={24} className={card.color} />
+                <StaggerItem key={card.label} className="h-full" duration={0.5}>
+                  <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-gray-mid text-sm mb-1">{card.label}</p>
+                        <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
+                          {card.value}
+                        </p>
+                      </div>
+                      <div className={`w-12 h-12 ${card.bg} rounded-lg flex items-center justify-center`}>
+                        <card.icon size={24} className={card.color} />
+                      </div>
                     </div>
                   </div>
-                </div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
 
             {/* Filters */}
             <div className="flex gap-2">
@@ -92,6 +97,7 @@ export default function AdminPayments() {
             </div>
 
             {/* Table */}
+            <Reveal duration={0.5} distance={16} amount={0.05}>
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
               <div className="p-4 border-b border-gray-100 text-sm text-gray-500">
                 {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}
@@ -145,6 +151,7 @@ export default function AdminPayments() {
                 </table>
               </div>
             </div>
+            </Reveal>
 
             {/* Detail modal */}
             {selectedPayment && (

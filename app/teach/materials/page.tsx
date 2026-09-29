@@ -1,6 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal } from '@/components/motion'
 import { Upload, FileText, Music, Video, File, Trash2, Loader2, AlertCircle, CheckCircle2, Play, Link as LinkIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { getMyMaterials, uploadMaterial, uploadYoutubeMaterial } from '@/lib/api/teacher'
@@ -133,7 +134,7 @@ export default function TeachMaterials() {
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6 max-w-7xl">
           {/* Upload Section */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-8" direction="up" duration={0.5} distance={20}>
             <h2 className="text-xl font-bold text-navy mb-6" style={{ fontFamily: 'Poppins' }}>
               Upload New Material
             </h2>
@@ -272,10 +273,10 @@ export default function TeachMaterials() {
                 </button>
               </div>
             )}
-          </div>
+          </Reveal>
 
           {/* Materials Library */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
             <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Uploaded Materials ({materials.length})
             </h3>
@@ -349,7 +350,7 @@ export default function TeachMaterials() {
                 ))}
               </div>
             )}
-          </div>
+          </Reveal>
         </div>
       </div>
     </div>

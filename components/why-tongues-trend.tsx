@@ -1,4 +1,5 @@
 import { Video, Trophy, Clock, Globe, Award, Users } from 'lucide-react'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 export default function WhyTonguesTrend() {
   const features = [
@@ -38,19 +39,19 @@ export default function WhyTonguesTrend() {
     <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="text-center mb-16 sm:mb-20">
+        <Reveal className="text-center mb-16 sm:mb-20">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
             Personalized Learning at Your Pace
           </h2>
           <p className="text-lg text-gray-mid max-w-2xl mx-auto">Every lesson is designed to make language learning feel exciting, supportive, and deeply personal.</p>
-        </div>
+        </Reveal>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+        <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10" stagger={0.09} amount={0.05}>
           {features.map((feature) => {
             const Icon = feature.icon
             return (
-              <div
+              <StaggerItem
                 key={feature.title}
                 className="bg-white rounded-2xl border border-gray-100 p-8 hover:border-gold hover:shadow-lg transition-all duration-150"
               >
@@ -66,10 +67,10 @@ export default function WhyTonguesTrend() {
 
                 {/* Description */}
                 <p className="text-gray-mid leading-relaxed">{feature.description}</p>
-              </div>
+              </StaggerItem>
             )
           })}
-        </div>
+        </Stagger>
       </div>
     </section>
   )

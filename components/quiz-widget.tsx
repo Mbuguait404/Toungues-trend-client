@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Loader2, Trophy, AlertCircle, CheckCircle2, XCircle, BookOpen } from 'lucide-react'
 import { getQuizzesByModule, getQuizById, submitQuizAttempt, getQuizAttempts, type Quiz, type QuizAttempt, type QuizQuestion } from '@/lib/api/quizzes'
 import { ApiException } from '@/lib/api'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 interface QuizWidgetProps {
   moduleId: string
@@ -80,7 +81,7 @@ export default function QuizWidget({ moduleId }: QuizWidgetProps) {
 
   if (activeQuiz && !result) {
     return (
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 mt-6">
+      <Reveal direction="up" distance={16} duration={0.5} className="bg-white rounded-2xl p-6 border border-gray-100 mt-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-navy">{activeQuiz.title}</h3>
           <span className="text-xs text-gray-500">{activeQuiz.questions.length} questions</span>
@@ -98,27 +99,28 @@ export default function QuizWidget({ moduleId }: QuizWidgetProps) {
               <p className="font-semibold text-navy text-sm mb-3">
                 {qi + 1}. {q.questionText}
               </p>
-              <div className="space-y-2">
+              <Stagger stagger={0.05} amount={0} className="space-y-2">
                 {q.options.map((opt: string, oi: number) => (
-                  <label
-                    key={oi}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors text-sm ${
-                      answers[qi] === oi
-                        ? 'bg-gold-50 border border-gold'
-                        : 'hover:bg-gray-50 border border-transparent'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={`q-${qi}`}
-                      checked={answers[qi] === oi}
-                      onChange={() => handleSelectAnswer(qi, oi)}
-                      className="accent-gold"
-                    />
-                    {opt}
-                  </label>
+                  <StaggerItem key={oi} as="div" direction="up" duration={0.35}>
+                    <label
+                      className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors text-sm ${
+                        answers[qi] === oi
+                          ? 'bg-gold-50 border border-gold'
+                          : 'hover:bg-gray-50 border border-transparent'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`q-${qi}`}
+                        checked={answers[qi] === oi}
+                        onChange={() => handleSelectAnswer(qi, oi)}
+                        className="accent-gold"
+                      />
+                      {opt}
+                    </label>
+                  </StaggerItem>
                 ))}
-              </div>
+              </Stagger>
             </div>
           ))}
         </div>
@@ -139,7 +141,7 @@ export default function QuizWidget({ moduleId }: QuizWidgetProps) {
             Back
           </button>
         </div>
-      </div>
+      </Reveal>
     )
   }
 
