@@ -54,12 +54,12 @@ export default function Navbar() {
         >
           {/* Logo */}
           <Link href="/" className="flex items-center group relative z-10">
-            <div className="relative overflow-hidden rounded-lg">
+            <div className="relative h-9 w-[120px] overflow-hidden rounded-lg">
               <Image 
                 src="/logo.png" 
                 alt="Tongues Trend Logo" 
-                width={120} 
-                height={36} 
+                fill
+                sizes="120px"
                 className={`object-contain transition-all duration-300 origin-left ${
                   scrolled ? 'scale-75 group-hover:scale-90' : 'scale-100 group-hover:scale-105'
                 }`} 

@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
-import { ArrowRight, GraduationCap, MessageCircle, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, GraduationCap, MessageCircle, Loader2 } from 'lucide-react'
 import { getAllCourses, type Course } from '@/lib/api/courses'
 
 type StaticTemplate = {
@@ -14,6 +14,7 @@ type StaticTemplate = {
   intro: string
   whyTitle: string
   mainImage: string
+  metricsImage: string
   highlights: Array<{ title: string; description: string; image: string }>
   structureIntro: string
   levels: Array<{ level: string; title: string; description: string }>
@@ -27,17 +28,24 @@ type StaticTemplate = {
   ctaImage: string
 }
 
+const WHY_IMAGES = {
+  lessons: '/images/shared/1 on 1 Lessons.png',
+  cefr: '/images/shared/CEFR Aligned.png',
+  pacing: '/images/shared/Customised Pacing.png',
+}
+
 const STATIC_TEMPLATES: Record<string, StaticTemplate> = {
   french: {
     slug: 'french',
     heroTitle: 'Learn French with Tongues Trend',
     intro: 'Discover the beauty of the French language with personalised online lessons. Whether you\'re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
     whyTitle: 'Why learn French with us?',
-    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    mainImage: '/images/Learn French Online with Tongues Trend/hero.jpg',
+    metricsImage: '/images/Learn French Online with Tongues Trend/levels.png',
     highlights: [
-      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public' },
-      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public' },
-      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public' },
+      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: WHY_IMAGES.lessons },
+      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: WHY_IMAGES.cefr },
+      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: WHY_IMAGES.pacing },
     ],
     structureIntro: 'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning.',
     levels: [
@@ -66,11 +74,12 @@ const STATIC_TEMPLATES: Record<string, StaticTemplate> = {
     heroTitle: 'Learn English with Tongues Trend',
     intro: 'Discover the beauty of the English language with personalised online lessons. Whether you\'re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
     whyTitle: 'Why learn English with us?',
-    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    mainImage: '/images/Learn English Online with Tongues Trend/hero.jpg',
+    metricsImage: '/images/Learn English Online with Tongues Trend/levels.png',
     highlights: [
-      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public' },
-      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public' },
-      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public' },
+      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: WHY_IMAGES.lessons },
+      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: WHY_IMAGES.cefr },
+      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: WHY_IMAGES.pacing },
     ],
     structureIntro: 'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning.',
     levels: [
@@ -99,11 +108,12 @@ const STATIC_TEMPLATES: Record<string, StaticTemplate> = {
     heroTitle: 'Learn German with Tongues Trend',
     intro: 'Discover the beauty of the German language with personalised online lessons. Whether you\'re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
     whyTitle: 'Why learn German with us?',
-    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    mainImage: '/images/Learn German Online with Tongues Trend/hero.jpg',
+    metricsImage: '/images/Learn German Online with Tongues Trend/levels.png',
     highlights: [
-      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public' },
-      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public' },
-      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public' },
+      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: WHY_IMAGES.lessons },
+      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: WHY_IMAGES.cefr },
+      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: WHY_IMAGES.pacing },
     ],
     structureIntro: 'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning.',
     levels: [
@@ -132,11 +142,12 @@ const STATIC_TEMPLATES: Record<string, StaticTemplate> = {
     heroTitle: 'Learn Kiswahili with Tongues Trend',
     intro: 'Discover the beauty of the Kiswahili language with personalised online lessons. Whether you\'re learning for travel, work, studies, or personal growth, our courses help you progress step by step, from A1 beginner to C2 mastery.',
     whyTitle: 'Why learn Kiswahili with us?',
-    mainImage: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/fd691340-feee-4a66-5cd7-c1eddd96bc00/public',
+    mainImage: '/images/Learn Kiswahili Online with Tongues Trend/hero.jpg',
+    metricsImage: '/images/Learn Kiswahili Online with Tongues Trend/levels.jpg',
     highlights: [
-      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/683660c0-8034-4f97-6d43-871861a4b400/public' },
-      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/aaf0e0d1-ba7e-4798-f3e1-73939c047700/public' },
-      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: 'https://imagedelivery.net/izwgnqPfd1oZ2j0ibzRYFw/2196afd3-8520-497c-3118-e7fde2835000/public' },
+      { title: '1 on 1 Lessons', description: 'Live online lessons with a professional teacher.', image: WHY_IMAGES.lessons },
+      { title: 'CEFR Aligned', description: 'Progress according to CEFR levels (A1 --> C2).', image: WHY_IMAGES.cefr },
+      { title: 'Customised Pacing', description: 'Customised pacing for your goals.', image: WHY_IMAGES.pacing },
     ],
     structureIntro: 'At Tongues Trend, our lessons follow the CEFR (Common European Framework of Reference), the global standard for language learning.',
     levels: [
@@ -216,9 +227,17 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
     <main className="w-full bg-white">
       <Navbar />
 
-      <section className="w-full bg-navy text-white pt-24 pb-20 sm:pt-28 sm:pb-24 lg:pt-32 lg:pb-28">
+      <section className="w-full bg-navy text-white pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <Link
+            href="/courses"
+            className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-white/80 transition-colors hover:text-gold"
+            style={{ fontFamily: 'Poppins' }}
+          >
+            <ArrowLeft size={18} />
+            Back to courses
+          </Link>
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
             <div>
               <p className="text-gold font-semibold uppercase tracking-[0.25em] text-sm mb-4">Language Course</p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Poppins' }}>
@@ -253,15 +272,15 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
               </div>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/10 p-4 shadow-2xl backdrop-blur">
-              <img src={template.mainImage} alt={`${displayName} learning`} className="h-72 w-full rounded-2xl object-cover" />
+              <img src={template.mainImage} alt={`${displayName} learning`} className="h-72 w-full rounded-2xl bg-white object-contain" />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
+      <section className="w-full bg-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               {template.whyTitle}
             </h2>
@@ -269,8 +288,8 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
           </div>
           <div className="grid gap-8 md:grid-cols-3">
             {template.highlights.map((item) => (
-              <div key={item.title} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <img src={item.image} alt={item.title} className="mb-5 h-40 w-full rounded-xl object-cover" />
+              <div key={item.title} className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <img src={item.image} alt={item.title} className="mx-auto mb-5 h-44 w-44 rounded-xl object-contain" />
                 <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>{item.title}</h3>
                 <p className="text-gray-mid leading-relaxed">{item.description}</p>
               </div>
@@ -279,48 +298,50 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
         </div>
       </section>
 
-      <section className="w-full bg-gray-light py-20 sm:py-24 lg:py-28">
+      <section className="w-full bg-gray-light py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-            <div>
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
                 <GraduationCap size={26} />
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
-                Course Structure ({displayName} Levels)
-              </h2>
-              <p className="text-gray-mid leading-relaxed mb-8">{template.structureIntro}</p>
-              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold mb-3">CEFR-Aligned</p>
-                <ul className="space-y-3">
-                  {template.levels.map((level) => (
-                    <li key={level.level} className="rounded-xl border border-gray-100 bg-gray-light px-4 py-3">
-                      <span className="font-semibold text-navy">{level.level} — {level.title}</span>
-                      <span className="ml-2 text-gray-dark">{level.description}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
-            <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
-              <img src={template.ctaImage} alt={`${displayName} course structure`} className="mb-6 h-56 w-full rounded-2xl object-cover" />
-              <h3 className="text-2xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>Clear progress at every step</h3>
-              <p className="text-gray-mid leading-relaxed">Each level is designed to help learners move from simple everyday communication to confident, advanced expression, with feedback and support throughout.</p>
-            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
+              Course Structure ({displayName} Levels)
+            </h2>
+            <p className="text-gray-mid leading-relaxed">{template.structureIntro}</p>
+          </div>
+          <div className="mb-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <img src={template.metricsImage} alt={`${displayName} course levels and progress`} className="block h-auto w-full" />
+          </div>
+          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <h3 className="text-2xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>Clear progress at every step</h3>
+            <p className="max-w-2xl text-gray-mid leading-relaxed">Each level is designed to help learners move from simple everyday communication to confident, advanced expression, with feedback and support throughout.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {template.levels.map((level) => (
+              <article key={level.level} className="h-full rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex items-baseline gap-3">
+                  <span className="text-xl font-bold text-navy">{level.level}</span>
+                  <span className="font-semibold text-gray-dark">{level.title}</span>
+                </div>
+                <p className="text-sm leading-relaxed text-gray-mid">{level.description}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
+      <section className="w-full bg-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>{template.teachingTitle}</h2>
             <p className="text-lg text-gray-mid max-w-2xl mx-auto">{template.teachingIntro}</p>
           </div>
           <div className="grid gap-8 lg:grid-cols-3">
             {template.teachingStyles.map((item) => (
-              <div key={item.title} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                <img src={item.image} alt={item.title} className="mb-5 h-40 w-full rounded-xl object-cover" />
+              <div key={item.title} className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <div className="mb-5 flex h-48 w-full items-center justify-center overflow-hidden rounded-xl bg-gray-light p-3">
+                  <img src={item.image} alt={item.title} className="h-full w-full object-contain" />
+                </div>
                 <h3 className="text-xl font-bold text-navy mb-3" style={{ fontFamily: 'Poppins' }}>{item.title}</h3>
                 <p className="text-gray-mid leading-relaxed">{item.description}</p>
               </div>
@@ -329,9 +350,9 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
         </div>
       </section>
 
-      <section className="w-full bg-navy py-20 sm:py-24 lg:py-28">
+      <section className="w-full bg-navy py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
             <div>
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold text-navy">
                 <MessageCircle size={24} />

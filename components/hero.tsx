@@ -1,9 +1,11 @@
+import Image from 'next/image'
+
 export default function Hero() {
   const languages = [
-    { flag: '🇫🇷', name: 'French' },
-    { flag: '🇬🇧', name: 'English' },
-    { flag: '🇩🇪', name: 'German' },
-    { flag: '🇰🇪', name: 'Kiswahili' },
+    { name: 'French', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_2_public.png' },
+    { name: 'English', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_3_public.png' },
+    { name: 'German', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_4_public.png' },
+    { name: 'Kiswahili', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_5_public.png' },
   ]
 
   const trustBadges = ['Tailored Learning Plans', 'Flexible Scheduling', 'Expert Instructors', 'CEFR-Aligned Progress']
@@ -53,9 +55,12 @@ export default function Hero() {
             {languages.map((lang) => (
               <div
                 key={lang.name}
-                className="px-4 py-2 bg-white bg-opacity-10 rounded-full text-sm text-gray-300 font-medium backdrop-blur"
+                className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 rounded-full text-sm text-gray-300 font-medium backdrop-blur"
               >
-                {lang.flag} {lang.name}
+                <div className="relative h-6 w-6 overflow-hidden rounded-full border border-white/40 bg-white/10">
+                  <Image src={lang.flag} alt={`${lang.name} flag`} fill className="object-cover" />
+                </div>
+                <span>{lang.name}</span>
               </div>
             ))}
           </div>

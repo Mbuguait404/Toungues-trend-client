@@ -13,7 +13,14 @@ export default function Footer() {
           {/* Column 1: Logo & Tagline */}
           <div>
             <Link href="/" className="inline-block mb-4">
-              <Image src="/logo.png" alt="Tongues Trend Logo" width={160} height={44} className="object-contain" />
+              <Image
+                src="/logo.png"
+                alt="Tongues Trend Logo"
+                width={160}
+                height={44}
+                style={{ width: 'auto', height: '44px' }}
+                className="object-contain"
+              />
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
               Premium 1-on-1 language tutoring connecting you with certified teachers worldwide.

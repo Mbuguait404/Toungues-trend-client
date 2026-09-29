@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/navbar'
@@ -20,15 +21,27 @@ const CEFR_LEVELS = [
   { level: 'C2', title: 'Mastery', description: 'Near-native fluency, cultural idioms, specialized vocabulary' },
 ]
 
+const FLAG_IMAGES: Record<string, string> = {
+  French: '/images/Language Tutoring Services at Tongues Trend/imgi_2_public.png',
+  English: '/images/Language Tutoring Services at Tongues Trend/imgi_3_public.png',
+  German: '/images/Language Tutoring Services at Tongues Trend/imgi_4_public.png',
+  Kiswahili: '/images/Language Tutoring Services at Tongues Trend/imgi_5_public.png',
+}
+
 const STATIC_COURSES = [
-  { _id: 'french', name: 'French', language: 'French', flag: '🇫🇷', slug: 'french', description: 'Master French from beginner to advanced with our native-speaking instructors. Learn conversational skills, grammar, and cultural nuances.', isActive: true },
-  { _id: 'english', name: 'English', language: 'English', flag: '🇬🇧', slug: 'english', description: 'Improve your English proficiency for business, travel, or personal growth. Focus on practical communication skills and confidence.', isActive: true },
-  { _id: 'german', name: 'German', language: 'German', flag: '🇩🇪', slug: 'german', description: 'Discover German with structured lessons. Perfect for professionals, students, and language enthusiasts at any level.', isActive: true },
-  { _id: 'kiswahili', name: 'Kiswahili', language: 'Kiswahili', flag: '🇰🇪', slug: 'kiswahili', description: 'Explore East African culture through Kiswahili. Ideal for those interested in African languages and cross-cultural communication.', isActive: true },
+  { _id: 'french', name: 'French', language: 'French', flag: FLAG_IMAGES.French, slug: 'french', description: 'Master French from beginner to advanced with our native-speaking instructors. Learn conversational skills, grammar, and cultural nuances.', isActive: true },
+  { _id: 'english', name: 'English', language: 'English', flag: FLAG_IMAGES.English, slug: 'english', description: 'Improve your English proficiency for business, travel, or personal growth. Focus on practical communication skills and confidence.', isActive: true },
+  { _id: 'german', name: 'German', language: 'German', flag: FLAG_IMAGES.German, slug: 'german', description: 'Discover German with structured lessons. Perfect for professionals, students, and language enthusiasts at any level.', isActive: true },
+  { _id: 'kiswahili', name: 'Kiswahili', language: 'Kiswahili', flag: FLAG_IMAGES.Kiswahili, slug: 'kiswahili', description: 'Explore East African culture through Kiswahili. Ideal for those interested in African languages and cross-cultural communication.', isActive: true },
 ]
 
 const FLAG_MAP: Record<string, string> = {
-  French: '🇫🇷', English: '🇬🇧', German: '🇩🇪', Kiswahili: '🇰🇪', Spanish: '🇪🇸', Italian: '🇮🇹',
+  french: FLAG_IMAGES.French,
+  english: FLAG_IMAGES.English,
+  german: FLAG_IMAGES.German,
+  kiswahili: FLAG_IMAGES.Kiswahili,
+  spanish: FLAG_IMAGES.French,
+  italian: FLAG_IMAGES.French,
 }
 
 const FAQItems = [
@@ -132,11 +145,16 @@ function EnrolModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-navy text-white px-6 py-5 flex items-center justify-between">
-          <div>
-            <p className="text-gold text-xs font-semibold uppercase tracking-widest mb-1">Enrol Now</p>
-            <h3 className="text-xl font-bold" style={{ fontFamily: 'Poppins' }}>
-              {course.flag} {course.name}
-            </h3>
+          <div className="flex items-center gap-3">
+            <div className="relative h-9 w-9 overflow-hidden rounded-full border border-white/30 bg-white/10">
+              <Image src={course.flag} alt={`${course.name} flag`} fill className="object-cover" />
+            </div>
+            <div>
+              <p className="text-gold text-xs font-semibold uppercase tracking-widest mb-1">Enrol Now</p>
+              <h3 className="text-xl font-bold" style={{ fontFamily: 'Poppins' }}>
+                {course.name}
+              </h3>
+            </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X size={24} />
@@ -221,7 +239,7 @@ function CoursesContent() {
               _id: c._id,
               name: c.title,
               language: c.language,
-              flag: FLAG_MAP[c.language] ?? '🌐',
+              flag: FLAG_MAP[c.language.trim().toLowerCase()] ?? FLAG_IMAGES.English,
               slug: c.language.toLowerCase(),
               description: c.description ?? '',
               isActive: c.isActive,
@@ -265,7 +283,9 @@ function CoursesContent() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-8">
                   <div className="lg:col-span-1">
                     <div className="bg-gray-light rounded-2xl p-8">
-                      <div className="text-6xl mb-4">{course.flag}</div>
+                      <div className="relative h-20 w-20 mb-4 overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm">
+                        <Image src={course.flag} alt={`${course.name} flag`} fill className="object-cover" />
+                      </div>
                       <h2 className="text-3xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                         {course.name}
                       </h2>

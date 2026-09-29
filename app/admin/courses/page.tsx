@@ -12,16 +12,16 @@ import { getAllUsers } from '@/lib/api/admin'
 import type { AuthUser } from '@/lib/auth'
 
 const LANGUAGE_OPTIONS = [
-  { value: 'french', label: 'French', flag: '🇫🇷' },
-  { value: 'english', label: 'English', flag: '🇬🇧' },
-  { value: 'german', label: 'German', flag: '🇩🇪' },
-  { value: 'kiswahili', label: 'Kiswahili', flag: '🇰🇪' },
+  { value: 'french', label: 'French', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_2_public.png' },
+  { value: 'english', label: 'English', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_3_public.png' },
+  { value: 'german', label: 'German', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_4_public.png' },
+  { value: 'kiswahili', label: 'Kiswahili', flag: '/images/Language Tutoring Services at Tongues Trend/imgi_5_public.png' },
 ]
 
 const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
 
 function langFlag(lang: string) {
-  return LANGUAGE_OPTIONS.find((l) => l.value === lang)?.flag ?? '🌐'
+  return LANGUAGE_OPTIONS.find((l) => l.value === lang)?.flag ?? LANGUAGE_OPTIONS[0].flag
 }
 
 function langLabel(lang: string) {

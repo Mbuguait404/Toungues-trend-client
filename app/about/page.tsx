@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
@@ -26,6 +27,25 @@ export default function About() {
       icon: Zap,
       title: 'Accessible Learning',
       description: 'Flexible scheduling, affordable pricing, and premium materials make expert language training attainable for everyone.',
+    },
+  ]
+
+  const aboutImages = [
+    {
+      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_2_public.jpg',
+      alt: 'Students learning online with Tongues Trend tutors',
+    },
+    {
+      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_3_public.png',
+      alt: 'Language learning mentorship and tutoring session',
+    },
+    {
+      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_4_public.png',
+      alt: 'Tongues Trend learning support and student engagement',
+    },
+    {
+      src: '/images/About Us - Our Mission, Team, and Approach to Language Education/imgi_5_public.webp',
+      alt: 'Interactive online language education environment',
     },
   ]
 
@@ -115,31 +135,58 @@ export default function About() {
                 Whether you are learning for travel, work, school, or personal growth, every lesson is designed to help you progress at your own pace with clarity and confidence.
               </p>
             </div>
-            <div className="bg-gray-light rounded-2xl p-8 border border-gray-100">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                  <span className="text-gray-mid text-sm font-medium">Expert Teachers</span>
-                  <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
-                    7+
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                  <span className="text-gray-mid text-sm font-medium">Active Students</span>
-                  <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
-                    500+
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                  <span className="text-gray-mid text-sm font-medium">Languages Taught</span>
-                  <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
-                    4
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-mid text-sm font-medium">Countries Served</span>
-                  <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
-                    12+
-                  </span>
+            <div className="space-y-4">
+              <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
+                <Image
+                  src={aboutImages[0].src}
+                  alt={aboutImages[0].alt}
+                  width={1200}
+                  height={900}
+                  className="w-full h-[360px] object-cover"
+                  priority
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {aboutImages.slice(1).map((image) => (
+                  <div key={image.src} className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      width={700}
+                      height={500}
+                      className="w-full h-36 object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gray-light rounded-2xl p-6 border border-gray-100">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span className="text-gray-mid text-sm font-medium">Expert Teachers</span>
+                    <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
+                      7+
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span className="text-gray-mid text-sm font-medium">Active Students</span>
+                    <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
+                      500+
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span className="text-gray-mid text-sm font-medium">Languages Taught</span>
+                    <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
+                      4
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-mid text-sm font-medium">Countries Served</span>
+                    <span className="text-2xl font-bold text-gold" style={{ fontFamily: 'Poppins' }}>
+                      12+
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

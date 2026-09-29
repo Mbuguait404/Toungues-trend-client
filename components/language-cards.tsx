@@ -1,31 +1,32 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export default function LanguageCards() {
   const languages = [
     {
-      flag: '🇫🇷',
+      flag: '/images/Language Tutoring Services at Tongues Trend/imgi_2_public.png',
       name: 'French',
       slug: 'french',
       description: 'Learn French from beginner to advanced. Master conversational skills, grammar, and cultural nuances with our native-speaking instructors.',
       cefrLevels: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
     },
     {
-      flag: '🇬🇧',
+      flag: '/images/Language Tutoring Services at Tongues Trend/imgi_3_public.png',
       name: 'English',
       slug: 'english',
       description: 'Improve your English proficiency whether for business, travel, or personal growth. Our teachers focus on practical communication skills.',
       cefrLevels: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
     },
     {
-      flag: '🇩🇪',
+      flag: '/images/Language Tutoring Services at Tongues Trend/imgi_4_public.png',
       name: 'German',
       slug: 'german',
       description: 'Discover the German language with structured lessons. Perfect for professionals, students, and language enthusiasts at any level.',
       cefrLevels: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
     },
     {
-      flag: '🇰🇪',
+      flag: '/images/Language Tutoring Services at Tongues Trend/imgi_5_public.png',
       name: 'Kiswahili',
       slug: 'kiswahili',
       description: 'Explore East African culture through Kiswahili. Ideal for those interested in African languages and cross-cultural communication.',
@@ -53,9 +54,12 @@ export default function LanguageCards() {
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-6">
-                <div>
+                <div className="flex items-center gap-3">
+                  <div className="relative h-10 w-10 overflow-hidden rounded-full border border-gray-200 bg-white">
+                    <Image src={lang.flag} alt={`${lang.name} flag`} fill className="object-cover" />
+                  </div>
                   <h3 className="text-3xl font-bold text-navy mb-1" style={{ fontFamily: 'Poppins' }}>
-                    {lang.flag} {lang.name}
+                    {lang.name}
                   </h3>
                 </div>
               </div>
