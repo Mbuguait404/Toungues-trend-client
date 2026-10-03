@@ -40,3 +40,10 @@ export function getEnrollmentById(id: string): Promise<Enrollment> {
 export function enrolInCourse(courseId: string, level: string): Promise<Enrollment> {
   return apiFetch<Enrollment>('/enrollments', { method: 'POST', body: { courseId, level }, auth: true })
 }
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export function getAllEnrollments(query?: Record<string, string>): Promise<Enrollment[]> {
+  const qs = query ? '?' + new URLSearchParams(query).toString() : ''
+  return apiFetch<Enrollment[]>(`/enrollments${qs}`, { auth: true })
+}
