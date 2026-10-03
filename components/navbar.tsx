@@ -7,6 +7,7 @@ import { motion, useScroll, useSpring } from 'motion/react'
 import { Menu, X, ChevronRight, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { roleToPath } from '@/lib/auth'
+import { NAV_LINKS } from '@/lib/site'
 
 const roleLabel: Record<string, string> = {
   LEARNER: 'Learner',
@@ -56,14 +57,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/courses', label: 'Courses' },
-    { href: '/tutors', label: 'Tutors' },
-    { href: '/pricing', label: 'Pricing' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
-  ]
+  const navLinks = NAV_LINKS
 
   return (
     <nav 

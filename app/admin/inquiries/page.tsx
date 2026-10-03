@@ -22,6 +22,11 @@ import {
   type Inquiry,
   type InquiryStatus,
 } from '@/lib/api/inquiries'
+import {
+  getAllSubscribers,
+  deleteSubscriber,
+  type Subscriber,
+} from '@/lib/api/subscribers'
 
 const STATUS_COLORS: Record<InquiryStatus, string> = {
   NEW: 'bg-blue-100 text-blue-700',
@@ -60,6 +65,9 @@ export default function AdminInquiries() {
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [view, setView] = useState<'inquiries' | 'subscribers'>('inquiries')
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([])
+  const [subscribersLoading, setSubscribersLoading] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -76,6 +84,21 @@ export default function AdminInquiries() {
   useEffect(() => {
     load()
   }, [load])
+
+  const loadSubscribers = useCallback(async () => {
+    setSubscribersLoading(true)
+    try {
+      setSubscribers(await getAllSubscribers({ limit: '200' }))
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to load subscribers'))
+    } finally {
+      setSubscribersLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (view === 'subscribers') loadSubscribers()
+  }, [view, loadSubscribers])
 
   const counts = useMemo(
     () => ({
@@ -191,6 +214,101 @@ export default function AdminInquiries() {
               ))}
             </Stagger>
 
+            {/* View tabs */}
+            <div className="flex gap-1 border-b border-gray-100">
+              {([
+                { value: 'inquiries' as const, label: 'Inquiries', count: inquiries.length },
+                { value: 'subscribers' as const, label: 'Subscribers', count: subscribers.length },
+              ]).map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setView(tab.value)}
+                  className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                    view === tab.value
+                      ? 'border-gold text-navy'
+                      : 'border-transparent text-gray-mid hover:text-navy'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.value === 'subscribers' && subscribers.length > 0 && (
+                    <span className="ml-2 text-xs text-gray-mid">({subscribers.length})</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {view === 'subscribers' ? (
+              <Reveal duration={0.5} distance={16} amount={0.05}>
+                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                  <div className="p-4 border-b border-gray-100 text-sm text-gray-500">
+                    {subscribers.length} subscriber{subscribers.length !== 1 ? 's' : ''} from the
+                    footer newsletter form
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-light border-b border-gray-100">
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Email</th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Subscribed</th>
+                          <th className="px-6 py-3 text-right text-sm font-semibold text-gray-dark">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subscribersLoading ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-12 text-center text-gray-400">
+                              <Loader2 size={24} className="animate-spin mx-auto" />
+                            </td>
+                          </tr>
+                        ) : subscribers.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-12 text-center text-gray-400">
+                              No subscribers yet. Signups from the footer form appear here.
+                            </td>
+                          </tr>
+                        ) : (
+                          subscribers.map((s, idx) => (
+                            <tr key={s._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-light'}>
+                              <td className="px-6 py-4">
+                                <a
+                                  href={`mailto:${s.email}`}
+                                  className="text-sm text-navy hover:text-gold transition-colors break-all"
+                                >
+                                  {s.email}
+                                </a>
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-dark whitespace-nowrap">
+                                {new Date(s.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <button
+                                  onClick={() => {
+                                    if (!window.confirm(`Remove ${s.email} from the list?`)) return
+                                    setBusyId(s._id)
+                                    deleteSubscriber(s._id)
+                                      .then(() =>
+                                        setSubscribers((prev) => prev.filter((x) => x._id !== s._id)),
+                                      )
+                                      .catch((err) => setError(errorMessage(err, 'Failed to remove subscriber')))
+                                      .finally(() => setBusyId(null))
+                                  }}
+                                  disabled={busyId === s._id}
+                                  aria-label={`Remove ${s.email}`}
+                                  className="inline-flex items-center text-red-500 hover:text-red-700 transition-colors disabled:opacity-40"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </Reveal>
+            ) : (
+              <>
             {/* Search + Filters */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="relative w-full lg:max-w-sm">
@@ -328,6 +446,8 @@ export default function AdminInquiries() {
               </div>
             </div>
             </Reveal>
+              </>
+            )}
           </>
         )}
       </div>
