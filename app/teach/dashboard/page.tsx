@@ -1,12 +1,45 @@
 'use client'
 
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import {
+  AlertCircle,
+  Calendar,
+  FileText,
+  Loader2,
+  TrendingUp,
+  Users,
+} from 'lucide-react'
 import TeachTopbar from '@/components/teach-topbar'
-import { Reveal, Stagger, StaggerItem } from '@/components/motion'
-import { Users, Calendar, FileText, TrendingUp, ChevronRight, Loader2, AlertCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { getTeacherSessions, getMyLearners, getMyMaterials } from '@/lib/api/teacher'
-import type { Session, TeacherLearner } from '@/lib/api/teacher'
+import { Card, EmptyBlock, EmptyRow, PageHeader, Pill, ProgressBar, StatTile } from '@/components/portal/portal-ui'
 import { useAuth } from '@/context/AuthContext'
+import {
+  getLearnerCourseTitle,
+  getLearnerEmail,
+  getLearnerLanguage,
+  getLearnerName,
+  getMyLearners,
+  getMyMaterials,
+  getTeacherSessions,
+  type Session,
+  type TeacherLearner,
+} from '@/lib/api/teacher'
+
+function formatWhen(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
+
+function initials(name: string): string {
+  return (
+    name
+      .split(' ')
+      .map((n) => n[0])
+      .filter(Boolean)
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?'
+  )
+}
 
 export default function TeachDashboard() {
   const { user } = useAuth()
@@ -14,141 +47,234 @@ export default function TeachDashboard() {
   const [learners, setLearners] = useState<TeacherLearner[]>([])
   const [materialsCount, setMaterialsCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    Promise.all([getTeacherSessions(), getMyLearners(), getMyMaterials()])
-      .then(([sess, lrns, mats]) => {
-        setSessions(sess)
-        setLearners(lrns)
-        setMaterialsCount(mats.length)
-      })
-      .catch((err) => setError(err?.message ?? 'Failed to load dashboard data'))
-      .finally(() => setIsLoading(false))
+  const load = useCallback(async (background = false) => {
+    if (background) setIsRefreshing(true)
+    try {
+      setError(null)
+      const [sess, lrns, mats] = await Promise.all([
+        getTeacherSessions(),
+        getMyLearners(),
+        getMyMaterials(),
+      ])
+      setSessions(sess)
+      setLearners(lrns)
+      setMaterialsCount(mats.length)
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : 'Failed to load dashboard data')
+    } finally {
+      setIsLoading(false)
+      setIsRefreshing(false)
+    }
   }, [])
 
-  const upcomingSessions = sessions.filter((s) => s.status === 'UPCOMING')
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const upcoming = useMemo(
+    () =>
+      sessions
+        .filter((s) => s.status === 'UPCOMING')
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()),
+    [sessions]
+  )
+
+  const avgProgress = useMemo(() => {
+    const withProgress = learners.filter((l) => typeof l.progress === 'number')
+    if (withProgress.length === 0) return null
+    return Math.round(withProgress.reduce((acc, l) => acc + (l.progress ?? 0), 0) / withProgress.length)
+  }, [learners])
+
+  const courses = useMemo(
+    () => new Set(learners.map(getLearnerCourseTitle).filter((t) => t && t !== 'Enrolled')).size,
+    [learners]
+  )
+
   const firstName = user?.name?.split(' ')[0] ?? 'there'
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-gray-mid">
+        <Loader2 size={28} className="animate-spin mr-3" />
+        Loading your data…
+      </div>
+    )
+  }
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <>
       <TeachTopbar title="Dashboard" />
       <div className="flex-1 overflow-auto">
-        <div className="p-6 space-y-8 max-w-7xl">
-          {/* Welcome Banner */}
-          <Reveal className="bg-navy rounded-2xl p-8 text-white" direction="up" duration={0.5} distance={20}>
-            <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
-              Welcome, {firstName}
-            </h2>
-            <p className="text-gray-300">
-              You have {upcomingSessions.length} upcoming session{upcomingSessions.length !== 1 ? 's' : ''}.
-            </p>
-          </Reveal>
+        <div className="max-w-[1400px] mx-auto p-5 space-y-4">
+          <PageHeader
+            title="Dashboard"
+            subtitle={
+              <>
+                Welcome back, {firstName} · computed from your live learners, sessions and materials
+              </>
+            }
+            onRefresh={() => load(true)}
+            refreshing={isRefreshing}
+          />
 
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16 text-gray-400">
-              <Loader2 size={32} className="animate-spin mr-3" />
-              Loading dashboard…
-            </div>
-          ) : error ? (
-            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-              <AlertCircle size={20} />
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <AlertCircle size={16} />
               {error}
             </div>
-          ) : (
-            <>
-              {/* Stats Row */}
-              <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.08} delay={0.1}>
-                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
-                  <div className="bg-blue-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <Users size={24} className="text-blue-500" />
-                  </div>
-                  <p className="text-gray-mid text-sm mb-1">Active Learners</p>
-                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{learners.length}</p>
-                </StaggerItem>
-                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
-                  <div className="bg-purple-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <Calendar size={24} className="text-purple-500" />
-                  </div>
-                  <p className="text-gray-mid text-sm mb-1">Upcoming Sessions</p>
-                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{upcomingSessions.length}</p>
-                </StaggerItem>
-                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
-                  <div className="bg-green-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <FileText size={24} className="text-green-500" />
-                  </div>
-                  <p className="text-gray-mid text-sm mb-1">Materials Uploaded</p>
-                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{materialsCount}</p>
-                </StaggerItem>
-                <StaggerItem className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all duration-150" duration={0.5}>
-                  <div className="bg-orange-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <TrendingUp size={24} className="text-orange-500" />
-                  </div>
-                  <p className="text-gray-mid text-sm mb-1">Avg. Learner Progress</p>
-                  <p className="text-3xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>{(learners as any).length > 0 ? Math.round((learners as any).reduce((acc: number, l: any) => acc + (l.progress ?? 0), 0) / (learners as any).length) + '%' : '—'}</p>
-                </StaggerItem>
-              </Stagger>
-
-              <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-8" stagger={0.1} delay={0.15} amount={0.05}>
-                {/* Upcoming Sessions List */}
-                <StaggerItem className="bg-white rounded-2xl border border-gray-100 p-6" duration={0.5}>
-                  <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>Upcoming Sessions</h3>
-                  {upcomingSessions.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No upcoming sessions.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {upcomingSessions.slice(0, 5).map((s) => (
-                        <div key={s._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gold-50 transition-colors">
-                          <div className="flex items-center gap-4">
-                            <div className="bg-white w-12 h-12 rounded-full flex flex-col items-center justify-center border border-gray-200">
-                              <span className="text-xs font-bold text-navy">{new Date(s.scheduledAt).getHours()}:{new Date(s.scheduledAt).getMinutes().toString().padStart(2, '0')}</span>
-                            </div>
-                            <div>
-                              <p className="font-semibold text-navy text-sm">{s.learnerName ?? 'Learner'}</p>
-                              <p className="text-xs text-gray-500">{s.language ?? 'Course'} • {s.level ?? '-'}</p>
-                            </div>
-                          </div>
-                          <button className="text-gold font-semibold text-sm hover:text-gold-light">Join</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </StaggerItem>
-
-                {/* My Learners List */}
-                <StaggerItem className="bg-white rounded-2xl border border-gray-100 p-6" duration={0.5}>
-                  <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>My Learners</h3>
-                  {learners.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No learners yet.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {learners.slice(0, 5).map((l: any) => (
-                        <div key={l._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm">
-                              {((l.userId?.name || l.name) || '').split(' ').map((n: string)=>n[0]).join('').slice(0,2).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-navy text-sm">{l.userId?.name ?? l.name}</p>
-                              <p className="text-xs text-gray-500">{l.courseId?.title ?? l.userId?.course ?? l.course ?? 'Enrolled'}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs font-semibold text-navy mb-1">{l.progress ?? 0}%</p>
-                            <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div className="h-full bg-gold" style={{ width: `${l.progress ?? 0}%` }} />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </StaggerItem>
-              </Stagger>
-            </>
           )}
+
+          {/* KPI row */}
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+            <StatTile
+              label="Active learners"
+              value={learners.length}
+              sub={`${courses} courses`}
+              icon={Users}
+              href="/teach/learners"
+            />
+            <StatTile
+              label="Upcoming sessions"
+              value={upcoming.length}
+              sub={upcoming.length ? 'next one below' : 'none booked'}
+              icon={Calendar}
+              href="/teach/schedule"
+            />
+            <StatTile
+              label="Materials"
+              value={materialsCount}
+              icon={FileText}
+              href="/teach/materials"
+            />
+            <StatTile
+              label="Avg. learner progress"
+              value={avgProgress === null ? '—' : `${avgProgress}%`}
+              sub={avgProgress === null ? 'no tracked learners' : undefined}
+              icon={TrendingUp}
+            />
+            <StatTile
+              label="Courses taught"
+              value={courses}
+              icon={Users}
+              href="/teach/modules"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            {/* Sessions — the session record has no learner name, so we show what is real */}
+            <Card
+              title="Upcoming sessions"
+              action={
+                <Link href="/teach/schedule" className="text-[11px] font-semibold text-gold hover:text-gold-light">
+                  Schedule
+                </Link>
+              }
+              bodyClassName="overflow-x-auto"
+            >
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-light border-b border-gray-100">
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      When
+                    </th>
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Language
+                    </th>
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Level
+                    </th>
+                    <th className="px-4 py-2 text-right text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Join
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcoming.length === 0 ? (
+                    <EmptyRow colSpan={4}>No upcoming sessions.</EmptyRow>
+                  ) : (
+                    upcoming.slice(0, 6).map((s, idx) => (
+                      <tr key={s._id} className={idx % 2 ? 'bg-gray-light/50' : ''}>
+                        <td className="px-4 py-2.5 text-sm text-navy whitespace-nowrap">
+                          {formatWhen(s.scheduledAt)}
+                        </td>
+                        <td className="px-4 py-2.5 text-sm text-gray-dark truncate max-w-[10rem]">
+                          {s.language ?? '—'}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <Pill tone="gray">{s.level ?? '—'}</Pill>
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          {s.zoomLink ? (
+                            <a
+                              href={s.zoomLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-block text-[11px] font-bold uppercase px-2 py-1 rounded-md bg-gold text-navy hover:bg-gold-light transition-colors"
+                            >
+                              Join
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-gray-mid italic">Link pending</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </Card>
+
+            {/* Learners */}
+            <Card
+              title="My learners"
+              action={
+                <Link href="/teach/learners" className="text-[11px] font-semibold text-gold hover:text-gold-light">
+                  View all
+                </Link>
+              }
+            >
+              {learners.length === 0 ? (
+                <EmptyBlock>
+                  No learners yet. Once someone enrols in one of your courses they appear here.
+                </EmptyBlock>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {learners.slice(0, 6).map((l) => {
+                    const name = getLearnerName(l)
+                    const email = getLearnerEmail(l)
+                    return (
+                      <li key={l._id} className="px-4 py-3 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-navy text-white flex items-center justify-center font-bold text-xs shrink-0">
+                          {initials(name)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-navy truncate">{name}</p>
+                          <p className="text-[11px] text-gray-mid truncate">
+                            {getLearnerCourseTitle(l)} · {getLearnerLanguage(l)}
+                          </p>
+                        </div>
+                        <div className="shrink-0 w-24">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-[11px] text-gray-mid">Progress</span>
+                            <span className="text-[11px] font-semibold text-navy tabular-nums">
+                              {l.progress ?? 0}%
+                            </span>
+                          </div>
+                          <ProgressBar value={l.progress ?? 0} />
+                          {email && <p className="text-[11px] text-gray-mid truncate mt-1">{email}</p>}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

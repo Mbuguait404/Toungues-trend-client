@@ -1,10 +1,29 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
+import { AlertCircle, Loader2, Search } from 'lucide-react'
 import TeachTopbar from '@/components/teach-topbar'
-import { Reveal } from '@/components/motion'
-import { Search, Loader2, AlertCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { getMyLearners, type TeacherLearner } from '@/lib/api/teacher'
+import { Card, EmptyRow, Pill, ProgressBar } from '@/components/portal/portal-ui'
+import {
+  getLearnerCourseTitle,
+  getLearnerEmail,
+  getLearnerLanguage,
+  getLearnerName,
+  getMyLearners,
+  type TeacherLearner,
+} from '@/lib/api/teacher'
+
+function initials(name: string): string {
+  return (
+    name
+      .split(' ')
+      .map((n) => n[0])
+      .filter(Boolean)
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?'
+  )
+}
 
 export default function TeachLearners() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -20,114 +39,138 @@ export default function TeachLearners() {
       .finally(() => setIsLoading(false))
   }, [])
 
-  const filtered = learners.filter((learner: any) => {
-    const name = learner.userId?.name ?? learner.name ?? ''
-    const course = learner.userId?.course ?? learner.courseId?.title ?? learner.course ?? ''
-    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesLang = languageFilter === 'all' || course.toLowerCase() === languageFilter.toLowerCase()
-    return matchesSearch && matchesLang
-  })
+  // Options come from the data rather than a hardcoded guess at the course list.
+  const languages = useMemo(
+    () => Array.from(new Set(learners.map(getLearnerLanguage).filter((l) => l && l !== '—'))).sort(),
+    [learners]
+  )
+
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    return learners.filter((l) => {
+      const haystack = `${getLearnerName(l)} ${getLearnerEmail(l) ?? ''} ${getLearnerCourseTitle(l)}`
+      const matchesSearch = !term || haystack.toLowerCase().includes(term)
+      const matchesLang =
+        languageFilter === 'all' || getLearnerLanguage(l).toLowerCase() === languageFilter.toLowerCase()
+      return matchesSearch && matchesLang
+    })
+  }, [learners, searchTerm, languageFilter])
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <>
       <TeachTopbar title="My Learners" />
       <div className="flex-1 overflow-auto">
-        <div className="p-6 space-y-6 max-w-7xl">
+        <div className="max-w-[1400px] mx-auto p-5 space-y-4">
           {/* Filters */}
-          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-wrap gap-4 items-center justify-between" direction="up" duration={0.5} distance={16}>
-            <div className="relative flex-1 min-w-64 max-w-md">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="bg-white rounded-xl border border-gray-100 p-4 flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-56 max-w-md">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-mid" />
               <input
                 type="text"
-                placeholder="Search learners by name…"
+                placeholder="Search by name, email or course…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gold"
               />
             </div>
-            <div className="flex gap-2">
-              <select
-                value={languageFilter}
-                onChange={(e) => setLanguageFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold"
-              >
-                <option value="all">All Languages</option>
-                <option value="french">French</option>
-                <option value="english">English</option>
-                <option value="german">German</option>
-                <option value="kiswahili">Kiswahili</option>
-              </select>
-            </div>
-          </Reveal>
+            <select
+              value={languageFilter}
+              onChange={(e) => setLanguageFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gold"
+            >
+              <option value="all">All languages</option>
+              {languages.map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang}
+                </option>
+              ))}
+            </select>
+            <span className="text-[11px] text-gray-mid ml-auto tabular-nums">
+              {filtered.length} of {learners.length}
+            </span>
+          </div>
 
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16 text-gray-400">
-              <Loader2 size={32} className="animate-spin mr-3" />
-              Loading learners…
-            </div>
-          ) : error ? (
-            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-              <AlertCircle size={20} />
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <AlertCircle size={16} />
               {error}
             </div>
-          ) : (
-            <Reveal className="bg-white rounded-2xl border border-gray-100 overflow-hidden" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-dark">Learner</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-dark">Course & Level</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-dark">Progress</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-dark">Last Active</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                          No learners found matching your criteria.
-                        </td>
-                      </tr>
-                    ) : (
-                      filtered.map((learner: any, idx) => (
-                        <tr key={learner._id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
+          )}
+
+          <Card title="Enrolled learners" bodyClassName="overflow-x-auto">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-16 text-gray-mid">
+                <Loader2 size={24} className="animate-spin mr-3" />
+                Loading learners…
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-light border-b border-gray-100">
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Learner
+                    </th>
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Course
+                    </th>
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Progress
+                    </th>
+                    <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-mid">
+                      Enrolled
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <EmptyRow colSpan={4}>No learners match your filters.</EmptyRow>
+                  ) : (
+                    filtered.map((l, idx) => {
+                      const name = getLearnerName(l)
+                      const email = getLearnerEmail(l)
+                      const enrolledAt = l.startedAt ?? l.createdAt
+                      return (
+                        <tr key={l._id} className={idx % 2 ? 'bg-gray-light/50' : ''}>
+                          <td className="px-4 py-2.5">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-navy text-white flex items-center justify-center font-bold text-sm">
-                                {((learner.userId?.name || learner.name) || '').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                              <div className="w-9 h-9 rounded-full bg-navy text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                {initials(name)}
                               </div>
-                              <div>
-                                <p className="font-semibold text-navy text-sm">{learner.userId?.name ?? learner.name}</p>
-                                <p className="text-xs text-gray-500">{learner.userId?.email ?? learner.email}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-navy truncate">{name}</p>
+                                {email && <p className="text-[11px] text-gray-mid truncate">{email}</p>}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <p className="font-medium text-navy text-sm">{learner.courseId?.title ?? learner.course ?? 'Enrolled'}</p>
-                            <p className="text-xs text-gray-500">{learner.courseId?.language ?? learner.level ?? '-'}</p>
+                          <td className="px-4 py-2.5">
+                            <p className="text-sm text-navy truncate max-w-[12rem]">
+                              {getLearnerCourseTitle(l)}
+                            </p>
+                            <Pill tone="gray">{getLearnerLanguage(l)}</Pill>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-gold rounded-full" style={{ width: `${learner.progress ?? 0}%` }} />
-                              </div>
-                              <span className="text-sm font-semibold text-navy">{learner.progress ?? 0}%</span>
+                          <td className="px-4 py-2.5 w-40">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="text-[11px] text-gray-mid tabular-nums">
+                                {l.progress ?? 0}%
+                              </span>
                             </div>
+                            <ProgressBar value={l.progress ?? 0} />
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {learner.lastActive ? new Date(learner.lastActive).toLocaleDateString() : 'N/A'}
+                          <td className="px-4 py-2.5 text-[11px] text-gray-mid whitespace-nowrap">
+                            {enrolledAt
+                              ? new Date(enrolledAt).toLocaleDateString(undefined, { dateStyle: 'medium' })
+                              : '—'}
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Reveal>
-          )}
+                      )
+                    })
+                  )}
+                </tbody>
+              </table>
+            )}
+          </Card>
         </div>
       </div>
-    </div>
+    </>
   )
 }

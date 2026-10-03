@@ -245,14 +245,21 @@ export default function CoursePage({ params }: { params: Promise<{ slug: string 
                 {displayTitle}
               </h1>
               <p className="text-lg sm:text-xl text-gray-300 max-w-2xl leading-relaxed mb-8">{displayDescription}</p>
+              {course && (
+                <p className="-mt-4 mb-6 text-sm font-semibold text-gold">
+                  {course.accessType === 'free'
+                    ? 'Free course'
+                    : `Paid course · ${course.currency} ${course.price?.toLocaleString() ?? 'Price not configured'} · First lesson part is free`}
+                </p>
+              )}
               <div className="flex flex-col sm:flex-row gap-4">
                 {course ? (
                   <Link
-                    href={`/courses?enrol=${course._id}`}
+                    href={`/courses?checkout=${course._id}&level=A1`}
                     className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3 font-semibold text-navy transition-all duration-150 hover:bg-gold-light"
                     style={{ fontFamily: 'Poppins' }}
                   >
-                    Enrol Now <ArrowRight className="ml-2 h-4 w-4" />
+                    {course.accessType === 'free' ? 'Start free course' : 'Register to get started'} <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 ) : (
                   <Link

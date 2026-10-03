@@ -41,13 +41,19 @@ export default function AdminCourses() {
   // Create modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const [newCourse, setNewCourse] = useState({ title: '', language: 'french', description: '', levels: [] as string[] })
+  const [newCourse, setNewCourse] = useState({
+    title: '', language: 'french', description: '', levels: [] as string[],
+    accessType: 'paid' as 'paid' | 'free', price: 0, currency: 'KES' as Course['currency'],
+  })
 
   // Edit modal state
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [editTab, setEditTab] = useState<'details' | 'teachers' | 'learners'>('details')
   const [editingCourse, setEditingCourse] = useState<Course | null>(null)
-  const [editForm, setEditForm] = useState({ title: '', language: 'french', description: '', levels: [] as string[] })
+  const [editForm, setEditForm] = useState({
+    title: '', language: 'french', description: '', levels: [] as string[],
+    accessType: 'paid' as 'paid' | 'free', price: 0, currency: 'KES' as Course['currency'],
+  })
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingLearners, setIsLoadingLearners] = useState(false)
 
@@ -90,7 +96,10 @@ export default function AdminCourses() {
 
   // ─── Create course ───────────────────────────────────────────────────────
   function openCreateModal() {
-    setNewCourse({ title: '', language: 'french', description: '', levels: [] })
+    setNewCourse({
+      title: '', language: 'french', description: '', levels: [],
+      accessType: 'paid', price: 0, currency: 'KES',
+    })
     setIsCreateOpen(true)
   }
 
@@ -112,7 +121,15 @@ export default function AdminCourses() {
   // ─── Edit course ─────────────────────────────────────────────────────────
   function openEditModal(course: Course) {
     setEditingCourse(course)
-    setEditForm({ title: course.title, language: course.language, description: course.description || '', levels: course.levels })
+    setEditForm({
+      title: course.title,
+      language: course.language,
+      description: course.description || '',
+      levels: course.levels,
+      accessType: course.accessType ?? 'paid',
+      price: course.price ?? 0,
+      currency: course.currency ?? 'KES',
+    })
     setEditTab('details')
     setCourseLearners([])
     setIsEditOpen(true)
@@ -289,6 +306,9 @@ export default function AdminCourses() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
+                  <p className="mt-3 text-sm font-semibold text-navy">
+                    {course.accessType === 'free' ? 'Free course' : `${course.currency ?? 'KES'} ${course.price?.toLocaleString() ?? 'Price required'}`}
+                  </p>
                 </div>
 
                 <div className="bg-gray-50 p-4 border-t border-gray-100 flex justify-between items-center">
@@ -369,6 +389,42 @@ export default function AdminCourses() {
                   rows={3}
                   placeholder="Course description…"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="text-sm font-semibold text-navy">
+                  Access
+                  <select
+                    value={newCourse.accessType}
+                    onChange={(e) => setNewCourse({ ...newCourse, accessType: e.target.value as 'paid' | 'free' })}
+                    className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 font-normal"
+                  >
+                    <option value="paid">Paid by default</option>
+                    <option value="free">Free</option>
+                  </select>
+                </label>
+                <label className="text-sm font-semibold text-navy">
+                  Price
+                  <div className="mt-1 flex gap-2">
+                    <select
+                      value={newCourse.currency}
+                      onChange={(e) => setNewCourse({ ...newCourse, currency: e.target.value as Course['currency'] })}
+                      className="rounded-xl border border-gray-200 bg-white px-2 py-2 font-normal"
+                    >
+                      {['KES', 'EUR', 'CHF', 'USD'].map((currency) => <option key={currency}>{currency}</option>)}
+                    </select>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      required={newCourse.accessType === 'paid'}
+                      disabled={newCourse.accessType === 'free'}
+                      value={newCourse.price || ''}
+                      onChange={(e) => setNewCourse({ ...newCourse, price: Number(e.target.value) })}
+                      className="min-w-0 w-full rounded-xl border border-gray-200 px-3 py-2 font-normal disabled:bg-gray-100"
+                      placeholder="Required for paid course"
+                    />
+                  </div>
+                </label>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-navy mb-2">CEFR Levels</label>
@@ -486,6 +542,41 @@ export default function AdminCourses() {
                       className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold text-sm resize-none"
                       rows={3}
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="text-sm font-semibold text-navy">
+                      Access
+                      <select
+                        value={editForm.accessType}
+                        onChange={(e) => setEditForm({ ...editForm, accessType: e.target.value as 'paid' | 'free' })}
+                        className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 font-normal"
+                      >
+                        <option value="paid">Paid by default</option>
+                        <option value="free">Free</option>
+                      </select>
+                    </label>
+                    <label className="text-sm font-semibold text-navy">
+                      Price
+                      <div className="mt-1 flex gap-2">
+                        <select
+                          value={editForm.currency}
+                          onChange={(e) => setEditForm({ ...editForm, currency: e.target.value as Course['currency'] })}
+                          className="rounded-xl border border-gray-200 bg-white px-2 py-2 font-normal"
+                        >
+                          {['KES', 'EUR', 'CHF', 'USD'].map((currency) => <option key={currency}>{currency}</option>)}
+                        </select>
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          required={editForm.accessType === 'paid'}
+                          disabled={editForm.accessType === 'free'}
+                          value={editForm.price || ''}
+                          onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                          className="min-w-0 w-full rounded-xl border border-gray-200 px-3 py-2 font-normal disabled:bg-gray-100"
+                        />
+                      </div>
+                    </label>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-navy mb-2">CEFR Levels</label>

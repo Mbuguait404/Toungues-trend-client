@@ -9,9 +9,10 @@ import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 interface QuizWidgetProps {
   moduleId: string
   enrollmentId?: string
+  unlockHref?: string
 }
 
-export default function QuizWidget({ moduleId }: QuizWidgetProps) {
+export default function QuizWidget({ moduleId, unlockHref }: QuizWidgetProps) {
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null)
   const [answers, setAnswers] = useState<number[]>([])
@@ -198,15 +199,22 @@ export default function QuizWidget({ moduleId }: QuizWidgetProps) {
               )}
               <div>
                 <p className="font-semibold text-navy text-sm">{q.title}</p>
-                <p className="text-xs text-gray-500">{q.questions.length} questions • Pass: {q.passScore}%</p>
+                <p className="text-xs text-gray-500">
+                  {q.locked ? 'Premium quiz · unlock the course to continue' : `${q.questions.length} questions · Pass: ${q.passScore}%`}
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => startQuiz(q._id)}
-              className="px-4 py-1.5 bg-gold hover:bg-gold-light text-navy text-sm font-semibold rounded-full transition-all"
-            >
-              {(q as any)._passed ? 'Retake' : 'Start'}
-            </button>
+            {q.locked && unlockHref ? (
+              <a href={unlockHref} className="px-4 py-1.5 text-amber-700 text-sm font-semibold">Unlock</a>
+            ) : (
+              <button
+                onClick={() => startQuiz(q._id)}
+                disabled={q.locked}
+                className="px-4 py-1.5 bg-gold hover:bg-gold-light text-navy text-sm font-semibold rounded-full transition-all disabled:opacity-50"
+              >
+                {q.locked ? 'Locked' : (q as any)._passed ? 'Retake' : 'Start'}
+              </button>
+            )}
           </div>
         ))}
       </div>

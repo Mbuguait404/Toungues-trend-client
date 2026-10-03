@@ -5,9 +5,10 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
-import { ChevronDown, X, Loader2, CheckCircle2, UserPlus } from 'lucide-react'
+import { ChevronDown, X, Loader2, CheckCircle2, UserPlus, Smartphone } from 'lucide-react'
 import { getAllCourses, type Course } from '@/lib/api/courses'
 import { enrolInCourse } from '@/lib/api/enrollments'
+import { getMyPayment, startPayHeroCoursePayment } from '@/lib/api/payments'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { ApiException } from '@/lib/api'
@@ -97,43 +98,112 @@ function FAQAccordion() {
 }
 
 type DisplayCourse = typeof STATIC_COURSES[number]
+  & { accessType?: 'paid' | 'free'; price?: number; currency?: Course['currency'] }
 
 function EnrolModal({
   course,
   onClose,
+  initialLevel,
 }: {
   course: DisplayCourse | null
   onClose: () => void
+  initialLevel: string
 }) {
   const { user } = useAuth()
   const router = useRouter()
-  const [selectedLevel, setSelectedLevel] = useState('A1')
+  const [selectedLevel, setSelectedLevel] = useState(initialLevel)
   const [isEnrolling, setIsEnrolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [previewStarted, setPreviewStarted] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [paymentId, setPaymentId] = useState<string | null>(null)
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!paymentId || paymentStatus !== 'pending') return
+    let active = true
+    const checkPayment = async () => {
+      try {
+        const payment = await getMyPayment(paymentId)
+        if (!active) return
+        setPaymentStatus(payment.status)
+        if (payment.status === 'success') {
+          setSuccess(true)
+          window.setTimeout(() => {
+            onClose()
+            router.push('/learn/courses')
+          }, 1600)
+        }
+        if (payment.status === 'failed') setError('Payment was not completed. You can try again.')
+      } catch {
+        if (active) setError('Could not check payment status. Refresh your payments page to check again.')
+      }
+    }
+    const timer = window.setInterval(checkPayment, 4000)
+    checkPayment()
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
+  }, [paymentId, paymentStatus])
 
   if (!course) return null
 
   const handleEnrol = async () => {
     if (!user) {
-      router.push(`/register?redirect=/courses?enrol=${course._id}`)
+      const returnTo = `/courses?checkout=${encodeURIComponent(course._id)}&level=${selectedLevel}`
+      router.push(`/register?redirect=${encodeURIComponent(returnTo)}`)
       return
     }
     setIsEnrolling(true)
     setError(null)
     try {
-      await enrolInCourse(course._id, selectedLevel)
-      setSuccess(true)
-      setTimeout(() => {
-        onClose()
-        router.push('/learn/courses')
-      }, 1800)
+      if (course.accessType === 'free') {
+        await enrolInCourse(course._id, selectedLevel)
+        setSuccess(true)
+        setTimeout(() => {
+          onClose()
+          router.push('/learn/courses')
+        }, 1800)
+      } else {
+        const result = await startPayHeroCoursePayment({
+          courseId: course._id,
+          level: selectedLevel,
+          phoneNumber,
+        })
+        setPaymentId(result.paymentId)
+        setPaymentStatus('pending')
+      }
     } catch (err: any) {
       if (err instanceof ApiException) {
         setError(err.message)
       } else {
         setError('Enrollment failed. Please try again.')
       }
+    } finally {
+      setIsEnrolling(false)
+    }
+  }
+
+  const handleStartPreview = async () => {
+    if (!user) {
+      const returnTo = `/courses?preview=${encodeURIComponent(course._id)}&level=${selectedLevel}`
+      router.push(`/register?redirect=${encodeURIComponent(returnTo)}`)
+      return
+    }
+    setIsEnrolling(true)
+    setError(null)
+    try {
+      await enrolInCourse(course._id, selectedLevel)
+      setPreviewStarted(true)
+      setSuccess(true)
+      window.setTimeout(() => {
+        onClose()
+        router.push('/learn/courses')
+      }, 1600)
+    } catch (err: any) {
+      setError(err instanceof ApiException ? err.message : 'Could not start the free preview')
     } finally {
       setIsEnrolling(false)
     }
@@ -166,8 +236,10 @@ function EnrolModal({
           {success ? (
             <div className="flex flex-col items-center text-center py-6">
               <CheckCircle2 size={56} className="text-green-500 mb-4" />
-              <h4 className="text-xl font-bold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>You're enrolled!</h4>
-              <p className="text-gray-500">Redirecting to your courses...</p>
+              <h4 className="text-xl font-bold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
+                {previewStarted ? 'Free preview ready' : course.accessType === 'free' ? "You're enrolled!" : 'Payment confirmed'}
+              </h4>
+              <p className="text-gray-500">Your course is ready. Redirecting to your courses...</p>
             </div>
           ) : (
             <>
@@ -207,14 +279,62 @@ function EnrolModal({
                 {CEFR_LEVELS.find(l => l.level === selectedLevel)?.description}
               </div>
 
+              {course.accessType !== 'free' && (
+                <div className="mb-5">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <span className="text-sm text-gray-600">Paid course</span>
+                    <span className="font-bold text-navy">
+                      {course.price != null ? `${course.currency ?? 'KES'} ${course.price.toLocaleString()}` : 'Price not configured'}
+                    </span>
+                  </div>
+                  {user && (
+                    <label className="block text-sm font-semibold text-navy">
+                      M-Pesa phone number
+                      <span className="relative mt-2 block">
+                        <Smartphone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="tel"
+                          value={phoneNumber}
+                          onChange={(event) => setPhoneNumber(event.target.value)}
+                          placeholder="07XXXXXXXX"
+                          className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-3 text-sm font-normal outline-none focus:border-gold"
+                        />
+                      </span>
+                    </label>
+                  )}
+                  {paymentStatus === 'pending' && (
+                    <p className="mt-3 flex items-center gap-2 text-sm text-amber-700">
+                      <Loader2 size={16} className="animate-spin" /> Approve the payment prompt on your phone.
+                    </p>
+                  )}
+                </div>
+              )}
+
               <button
                 onClick={handleEnrol}
-                disabled={isEnrolling}
+                disabled={isEnrolling || paymentStatus === 'pending' || (course.accessType !== 'free' && (!course.price || user && !phoneNumber.trim() || !user && !/^([0-9a-f]{24})$/i.test(course._id)))}
                 className="w-full bg-gold text-navy font-bold py-3 rounded-full hover:bg-gold-light transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isEnrolling ? <Loader2 size={18} className="animate-spin" /> : null}
-                {isEnrolling ? 'Enrolling...' : user ? 'Confirm Enrolment' : 'Create Account & Enrol'}
+                {isEnrolling
+                  ? paymentId ? 'Starting payment...' : 'Enrolling...'
+                  : paymentStatus === 'pending'
+                    ? 'Waiting for payment'
+                    : course.accessType === 'free'
+                      ? user ? 'Start free course' : 'Register to start free'
+                      : user ? paymentStatus === 'failed' ? 'Try payment again' : 'Pay to get started'
+                        : 'Register to get started'}
               </button>
+              {course.accessType !== 'free' && (
+                <button
+                  type="button"
+                  onClick={handleStartPreview}
+                  disabled={isEnrolling || paymentStatus === 'pending'}
+                  className="mt-3 w-full rounded-full border border-gray-200 py-3 font-semibold text-gray-700 hover:border-gold hover:text-navy disabled:opacity-50"
+                >
+                  {user ? 'Start with the free first lesson part' : 'Register for the free preview'}
+                </button>
+              )}
             </>
           )}
         </div>
@@ -226,6 +346,9 @@ function EnrolModal({
 function CoursesContent() {
   const searchParams = useSearchParams()
   const enrolParam = searchParams.get('enrol')
+  const checkoutParam = searchParams.get('checkout')
+  const previewParam = searchParams.get('preview')
+  const checkoutLevel = searchParams.get('level') ?? 'A1'
 
   const [courses, setCourses] = useState<DisplayCourse[]>(STATIC_COURSES)
   const [enrollingCourse, setEnrollingCourse] = useState<DisplayCourse | null>(null)
@@ -249,6 +372,9 @@ function CoursesContent() {
               slug,
               description: apiCourse.description ?? '',
               isActive: apiCourse.isActive,
+              accessType: apiCourse.accessType ?? 'paid',
+              price: apiCourse.price,
+              currency: apiCourse.currency ?? 'KES',
             })
           })
 
@@ -257,15 +383,16 @@ function CoursesContent() {
       .catch(() => {})
   }, [])
 
-  // Auto-open enrol modal if ?enrol=COURSE_ID is in the URL
+  // Resume checkout after registration, or preserve the legacy enrol link.
   useEffect(() => {
-    if (enrolParam && courses.length > 0) {
-      const target = courses.find((c) => c._id === enrolParam)
+    const targetId = checkoutParam ?? previewParam ?? enrolParam
+    if (targetId && courses.length > 0) {
+      const target = courses.find((c) => c._id === targetId)
       if (target) {
         setEnrollingCourse(target)
       }
     }
-  }, [enrolParam, courses])
+  }, [checkoutParam, previewParam, enrolParam, courses])
 
   return (
     <main className="w-full bg-white">
@@ -286,7 +413,7 @@ function CoursesContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Stagger className="space-y-12 lg:space-y-16" stagger={0.12} amount={0.05}>
             {courses.map((course, idx) => (
-              <StaggerItem key={course.name}>
+              <StaggerItem key={course.slug}>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-8">
                   <div className="lg:col-span-1">
                     <div className="bg-gray-light rounded-2xl p-8">
@@ -297,13 +424,19 @@ function CoursesContent() {
                         {course.name}
                       </h2>
                       <p className="text-gray-mid mb-6 leading-relaxed">{course.description}</p>
+                      <p className="mb-5 text-sm font-semibold text-navy">
+                        {course.accessType === 'free'
+                          ? 'Free course'
+                          : `${course.price != null ? `${course.currency ?? 'KES'} ${course.price.toLocaleString()} · ` : 'Paid course · '}`}
+                        {course.accessType !== 'free' && 'First lesson part is free'}
+                      </p>
                       <div className="flex gap-3">
                         <button
                           onClick={() => setEnrollingCourse(course)}
                           className="flex-1 px-4 py-3 rounded-full bg-gold text-navy font-semibold hover:bg-gold-light transition-all duration-150 text-center"
                           style={{ fontFamily: 'Poppins' }}
                         >
-                          Enrol Now
+                          {course.accessType === 'free' ? 'Start free' : 'Register to get started'}
                         </button>
                         <a
                           href={`/courses/${(course.language || course.name).toLowerCase()}`}
@@ -374,7 +507,7 @@ function CoursesContent() {
       <Footer />
 
       {enrollingCourse && (
-        <EnrolModal course={enrollingCourse} onClose={() => setEnrollingCourse(null)} />
+        <EnrolModal course={enrollingCourse} initialLevel={checkoutLevel} onClose={() => setEnrollingCourse(null)} />
       )}
     </main>
   )

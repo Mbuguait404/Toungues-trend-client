@@ -11,6 +11,8 @@ export interface Quiz {
   _id: string
   moduleId: string
   title: string
+  accessType?: 'free' | 'premium'
+  locked?: boolean
   questions: QuizQuestion[]
   passScore: number
   createdBy: string

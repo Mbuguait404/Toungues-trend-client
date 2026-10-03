@@ -4,10 +4,13 @@ export interface Material {
   _id: string
   title: string
   fileUrl: string
+  accessType?: 'free' | 'premium'
+  locked?: boolean
   fileType: string
   type?: string
   courseId: string
   moduleId?: string
+  partId?: string
   uploadedBy: string
   viewCount?: number
   createdAt: string

@@ -54,7 +54,7 @@ export default function CoursesPage() {
         ) : (
           enrollments.map((enrollment) => {
             const progress = enrollment.progress ?? 0
-            const done = enrollment.completedModules ?? 0
+            const done = enrollment.completedModulesCount ?? 0
             const total = enrollment.totalModules ?? 0
             const badge = getStatusBadge(progress, total, done)
 

@@ -269,8 +269,8 @@ export default function AdminDashboard() {
   const activity = useMemo(() => buildActivity(inquiries, users, payments, 9), [inquiries, users, payments])
 
   const newInquiries = inquiries.filter((i) => i.status === 'NEW').length
-  const successPayments = payments.filter((p) => p.status === 'SUCCESS')
-  const pendingPayments = payments.filter((p) => p.status === 'PENDING')
+  const successPayments = payments.filter((p) => p.status === 'success')
+  const pendingPayments = payments.filter((p) => p.status === 'pending')
 
   const hasChartData = series.some((p) => p.amount > 0)
   const rangeLabel = series.length ? `${series[0].label} – ${series[series.length - 1].label}` : ''
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
             </h1>
             <p className="text-xs text-gray-mid mt-0.5">
               {rangeLabel && <>Revenue window {rangeLabel} · </>}
-              All figures in KES, computed from live records
+              Revenue charts show KES payments; other currencies remain visible in payment records.
             </p>
           </div>
           <button
@@ -364,7 +364,7 @@ export default function AdminDashboard() {
             className="xl:col-span-2"
             action={
               <span className="text-[11px] text-gray-mid">
-                {KES(successPayments.reduce((a, p) => a + p.amount, 0))} all time
+                {KES(successPayments.filter((payment) => payment.currency === 'KES').reduce((a, p) => a + p.amount, 0))} all time
               </span>
             }
           >
@@ -486,12 +486,12 @@ export default function AdminDashboard() {
                     payments.slice(0, 6).map((p, idx) => (
                       <tr key={p._id} className={idx % 2 ? 'bg-gray-light/50' : ''}>
                         <td className="px-4 py-2.5 text-sm font-semibold text-navy whitespace-nowrap tabular-nums">
-                          {p.currency} {formatKes(p.amount)}
+                          {p.currency} {p.amount.toLocaleString()}
                         </td>
                         <td className="px-4 py-2.5">
                           <span
                             className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-                              p.method === 'MPESA' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                              p.method === 'payhero' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
                             }`}
                           >
                             {p.method}
@@ -500,9 +500,9 @@ export default function AdminDashboard() {
                         <td className="px-4 py-2.5">
                           <span
                             className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-                              p.status === 'SUCCESS'
+                              p.status === 'success'
                                 ? 'bg-green-100 text-green-700'
-                                : p.status === 'PENDING'
+                                : p.status === 'pending'
                                   ? 'bg-amber-100 text-amber-700'
                                   : 'bg-red-100 text-red-700'
                             }`}

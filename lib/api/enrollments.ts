@@ -7,11 +7,13 @@ export interface Enrollment {
   language?: string
   level?: string
   progress?: number
-  completedModules?: number
+  /** Matches the API DTO — the raw mongoose array is not serialised. */
+  completedModulesCount?: number
   totalModules?: number
   isActive: boolean
   createdAt: string
   status?: string
+  accessStatus?: 'preview' | 'paid' | 'free'
 }
 
 // Helper to resolve populated course fields

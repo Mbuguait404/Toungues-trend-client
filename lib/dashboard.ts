@@ -77,7 +77,7 @@ const within = (d: Date, start: Date, end: Date) => d >= start && d < end
 export function revenueFor(payments: Payment[], offset: number): number {
   const { start, end } = monthRange(offset)
   return payments
-    .filter((p) => p.status === 'SUCCESS' && within(new Date(p.createdAt), start, end))
+    .filter((p) => p.status === 'success' && p.currency === 'KES' && within(new Date(p.createdAt), start, end))
     .reduce((sum, p) => sum + p.amount, 0)
 }
 
@@ -91,7 +91,7 @@ export function revenueSeries(payments: Payment[], months = 6): RevenuePoint[] {
     const start = new Date(d.getFullYear(), d.getMonth(), 1)
     const end = new Date(d.getFullYear(), d.getMonth() + 1, 1)
     const inBucket = payments.filter(
-      (p) => p.status === 'SUCCESS' && within(new Date(p.createdAt), start, end),
+      (p) => p.status === 'success' && p.currency === 'KES' && within(new Date(p.createdAt), start, end),
     )
     buckets.push({
       key: monthKey(d),

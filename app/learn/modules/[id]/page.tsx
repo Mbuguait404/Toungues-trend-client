@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState, use } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import LearnTopbar from '@/components/learn-topbar'
-import { Download, FileText, Volume2, Video, File, Loader2, AlertCircle, CheckCircle2, Clock, Target } from 'lucide-react'
+import { Download, FileText, Volume2, Video, File, Loader2, AlertCircle, CheckCircle2, Clock, Target, LockKeyhole } from 'lucide-react'
 import { getModuleById, type CourseModule } from '@/lib/api/modules'
 import { getMaterials, type Material } from '@/lib/api/materials'
 import { getEnrollmentProgress, updateProgress, type Progress } from '@/lib/api/progress'
@@ -23,11 +23,14 @@ function getFileIcon(type: string) {
 export default function ModulePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: moduleId } = use(params)
   const searchParams = useSearchParams()
+  const router = useRouter()
   const enrollmentId = searchParams.get('enrollmentId')
 
   const [mod, setModule] = useState<CourseModule | null>(null)
   const [materials, setMaterials] = useState<Material[]>([])
   const [progress, setProgress] = useState<Progress | null>(null)
+  const [partProgress, setPartProgress] = useState<Record<string, Progress>>({})
+  const [materialProgress, setMaterialProgress] = useState<Record<string, Progress>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isCompleting, setIsCompleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,11 +45,23 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
 
         const mats = await getMaterials(undefined, moduleId)
         setMaterials(mats)
-
         if (enrollmentId) {
           const progList = await getEnrollmentProgress(enrollmentId)
-          const found = progList.find((p) => p.moduleId === moduleId)
+          const found = progList.find((p) => p.moduleId === moduleId && !p.partId && !p.materialId)
           if (found) setProgress(found)
+          const partMap: Record<string, Progress> = {}
+          const materialMap: Record<string, Progress> = {}
+          for (const item of progList) {
+            if (item.moduleId === moduleId && item.partId) partMap[item.partId] = item
+            if (item.moduleId === moduleId && item.materialId) materialMap[item.materialId] = item
+          }
+          setPartProgress(partMap)
+          setMaterialProgress(materialMap)
+          for (const part of modData.parts ?? []) {
+            if (!part.locked && part._id && !partMap[part._id]) {
+              void updateProgress(enrollmentId, { moduleId, partId: part._id }).catch(() => {})
+            }
+          }
         }
       } catch (err) {
         setError(err instanceof ApiException ? err.message : 'Failed to load module')
@@ -67,6 +82,26 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
       setError(err instanceof ApiException ? err.message : 'Failed to mark as complete')
     } finally {
       setIsCompleting(false)
+    }
+  }
+
+  const handlePartComplete = async (partId: string) => {
+    if (!enrollmentId || partProgress[partId]?.isCompleted) return
+    try {
+      const result = await updateProgress(enrollmentId, { moduleId, partId, isCompleted: true })
+      setPartProgress((current) => ({ ...current, [partId]: result }))
+    } catch (err) {
+      setError(err instanceof ApiException ? err.message : 'Failed to save lesson progress')
+    }
+  }
+
+  const handleMaterialView = async (materialId: string) => {
+    if (!enrollmentId || materialProgress[materialId]) return
+    try {
+      const result = await updateProgress(enrollmentId, { moduleId, materialId })
+      setMaterialProgress((current) => ({ ...current, [materialId]: result }))
+    } catch {
+      setError('Could not save resource view progress.')
     }
   }
 
@@ -106,7 +141,7 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
           </h2>
           <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm mt-3">
             <span className="bg-white/10 px-3 py-1 rounded-full text-xs font-semibold">Level: {mod.level}</span>
-            {mod.estimatedDuration > 0 && (
+            {(mod.estimatedDuration ?? 0) > 0 && (
               <span className="flex items-center gap-1">
                 <Clock size={14} /> {mod.estimatedDuration} min
               </span>
@@ -146,6 +181,45 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
             </Reveal>
           )}
 
+          {mod.parts && mod.parts.length > 0 && (
+            <div className="space-y-4">
+              {mod.parts.map((part) => (
+                <Reveal key={part._id ?? part.order} className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.1} duration={0.5} distance={18}>
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-navy">{part.title}</h3>
+                      <span className={`mt-1 inline-block text-xs font-semibold ${part.locked ? 'text-amber-700' : 'text-green-700'}`}>
+                        {part.locked ? 'Premium lesson part' : 'Free preview'}
+                      </span>
+                    </div>
+                    {part.locked && <LockKeyhole size={20} className="text-amber-600" />}
+                    {!part.locked && part._id && partProgress[part._id]?.isCompleted && <CheckCircle2 size={20} className="text-green-600" />}
+                  </div>
+                  {part.locked ? (
+                    <div className="rounded-xl bg-gray-50 p-4">
+                      <p className="text-sm text-gray-600 mb-3">Unlock the course to continue this lesson.</p>
+                      <button
+                        onClick={() => router.push(`/courses?checkout=${mod.courseId}&level=${mod.level}`)}
+                        className="rounded-full bg-gold px-5 py-2 text-sm font-semibold text-navy hover:bg-gold-light"
+                      >
+                        Pay to unlock course
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{part.content}</div>
+                      {enrollmentId && part._id && !partProgress[part._id]?.isCompleted && (
+                        <button onClick={() => handlePartComplete(part._id!)} className="mt-4 text-sm font-semibold text-gold hover:text-gold-light">
+                          Mark part complete
+                        </button>
+                      )}
+                    </>
+                  )}
+                </Reveal>
+              ))}
+            </div>
+          )}
+
           {mod.notes && (
             <Reveal className="bg-gold-50 rounded-2xl p-6 border border-gold/20" amount={0.1} duration={0.5} distance={18}>
               <h3 className="text-lg font-bold text-navy mb-3">Teacher Notes</h3>
@@ -169,12 +243,23 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
                       <div>
                         <p className="font-semibold text-navy text-sm">{m.title}</p>
                         <p className="text-xs text-gray-500 uppercase">{m.type || m.fileType}</p>
+                        {materialProgress[m._id]?.eventType === 'viewed' && <p className="text-xs font-semibold text-green-700">Viewed</p>}
                       </div>
                     </div>
-                    {m.fileUrl ? (
-                      <a href={m.fileUrl} target="_blank" rel="noreferrer" className="p-2 text-gold hover:bg-gold-100 rounded-lg transition-colors">
+                    {m.fileUrl && !m.locked ? (
+                      <a
+                        href={m.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => void handleMaterialView(m._id)}
+                        className="p-2 text-gold hover:bg-gold-100 rounded-lg transition-colors"
+                      >
                         <Download size={20} />
                       </a>
+                    ) : m.locked ? (
+                      <button onClick={() => router.push(`/courses?checkout=${mod.courseId}&level=${mod.level}`)} className="text-xs font-semibold text-amber-700">
+                        Unlock
+                      </button>
                     ) : (
                       <span className="text-xs text-gray-400">No link</span>
                     )}
@@ -184,9 +269,15 @@ export default function ModulePage({ params }: { params: Promise<{ id: string }>
             )}
           </Reveal>
 
-          <QuizWidget moduleId={moduleId} enrollmentId={enrollmentId ?? undefined} />
+          {!mod.locked && (
+            <QuizWidget
+              moduleId={moduleId}
+              enrollmentId={enrollmentId ?? undefined}
+              unlockHref={`/courses?checkout=${mod.courseId}&level=${mod.level}`}
+            />
+          )}
 
-          {enrollmentId && (
+          {enrollmentId && !mod.locked && (mod.accessLevel === 'full' || mod.accessType === 'free') && (
             <Reveal className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.1} duration={0.5} distance={18}>
               <div className="flex justify-end">
                 {isCompleted ? (

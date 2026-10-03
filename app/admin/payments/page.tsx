@@ -7,21 +7,21 @@ import { DollarSign, Loader2, AlertCircle, X } from 'lucide-react'
 import { getAllPayments, type Payment } from '@/lib/api/admin'
 
 const METHOD_COLORS: Record<string, string> = {
-  MPESA: 'bg-green-100 text-green-700',
-  STRIPE: 'bg-blue-100 text-blue-700',
+  payhero: 'bg-green-100 text-green-700',
+  stripe: 'bg-blue-100 text-blue-700',
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  SUCCESS: 'bg-green-100 text-green-700',
-  PENDING: 'bg-amber-100 text-amber-700',
-  FAILED: 'bg-red-100 text-red-700',
+  success: 'bg-green-100 text-green-700',
+  pending: 'bg-amber-100 text-amber-700',
+  failed: 'bg-red-100 text-red-700',
 }
 
 export default function AdminPayments() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
 
   useEffect(() => {
@@ -32,13 +32,19 @@ export default function AdminPayments() {
   }, [])
 
   const filtered = payments.filter((p) =>
-    statusFilter === 'ALL' ? true : p.status === statusFilter,
+    statusFilter === 'all' ? true : p.status === statusFilter,
   )
 
-  const successPayments = payments.filter((p) => p.status === 'SUCCESS')
-  const pendingPayments = payments.filter((p) => p.status === 'PENDING')
-  const failedPayments = payments.filter((p) => p.status === 'FAILED')
-  const totalRevenue = successPayments.reduce((a, p) => a + p.amount, 0)
+  const successPayments = payments.filter((p) => p.status === 'success')
+  const pendingPayments = payments.filter((p) => p.status === 'pending')
+  const failedPayments = payments.filter((p) => p.status === 'failed')
+  const revenueByCurrency = successPayments.reduce<Record<string, number>>((totals, payment) => {
+    totals[payment.currency] = (totals[payment.currency] ?? 0) + payment.amount
+    return totals
+  }, {})
+  const totalRevenue = Object.entries(revenueByCurrency)
+    .map(([currency, total]) => `${currency} ${total.toLocaleString()}`)
+    .join(' · ') || 'KES 0'
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -61,7 +67,7 @@ export default function AdminPayments() {
             {/* Summary Cards */}
             <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6" amount={0.1} stagger={0.07}>
               {[
-                { label: 'Total Revenue', value: `KES ${totalRevenue.toLocaleString()}`, icon: DollarSign, bg: 'bg-gold/10', color: 'text-gold' },
+                { label: 'Total Revenue', value: totalRevenue, icon: DollarSign, bg: 'bg-gold/10', color: 'text-gold' },
                 { label: 'Pending', value: pendingPayments.length, icon: DollarSign, bg: 'bg-amber-100', color: 'text-amber-600' },
                 { label: 'Failed', value: failedPayments.length, icon: DollarSign, bg: 'bg-red-100', color: 'text-red-600' },
               ].map((card) => (
@@ -85,13 +91,13 @@ export default function AdminPayments() {
 
             {/* Filters */}
             <div className="flex gap-2">
-              {['ALL', 'SUCCESS', 'PENDING', 'FAILED'].map((s) => (
+              {['all', 'success', 'pending', 'failed'].map((s) => (
                 <button
                   key={s}
                   onClick={() => setStatusFilter(s)}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${statusFilter === s ? 'bg-gold text-navy' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 >
-                  {s === 'ALL' ? 'All' : s.charAt(0) + s.slice(1).toLowerCase()}
+                  {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
             </div>
@@ -107,6 +113,8 @@ export default function AdminPayments() {
                   <thead>
                     <tr className="bg-gray-light border-b border-gray-100">
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Amount</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Learner</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Course</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Method</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Status</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Date</th>
@@ -116,8 +124,8 @@ export default function AdminPayments() {
                   <tbody>
                     {filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
-                          No {statusFilter === 'ALL' ? '' : statusFilter.toLowerCase() + ' '}payments.
+                        <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
+                          No {statusFilter === 'all' ? '' : statusFilter + ' '}payments.
                         </td>
                       </tr>
                     ) : (
@@ -125,6 +133,13 @@ export default function AdminPayments() {
                         <tr key={p._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-light'}>
                           <td className="px-6 py-4 text-sm font-semibold text-navy">
                             {p.currency} {p.amount.toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-dark">
+                            {typeof p.userId === 'object' ? p.userId.name : p.userName ?? 'Learner'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-dark">
+                            {typeof p.courseId === 'object' ? p.courseId.title : 'Legacy payment'}
+                            {p.level && <span className="block text-xs text-gray-500">Level {p.level}</span>}
                           </td>
                           <td className="px-6 py-4">
                             <span className={`text-xs font-semibold px-2 py-1 rounded-full ${METHOD_COLORS[p.method] ?? 'bg-gray-100 text-gray-600'}`}>
@@ -163,6 +178,9 @@ export default function AdminPayments() {
                   </div>
                   <dl className="space-y-3 text-sm">
                     <div className="flex justify-between"><dt className="text-gray-500">ID</dt><dd className="font-mono text-xs">{selectedPayment._id}</dd></div>
+                    <div className="flex justify-between"><dt className="text-gray-500">Learner</dt><dd>{typeof selectedPayment.userId === 'object' ? selectedPayment.userId.name : selectedPayment.userName ?? 'Learner'}</dd></div>
+                    <div className="flex justify-between"><dt className="text-gray-500">Course</dt><dd>{typeof selectedPayment.courseId === 'object' ? selectedPayment.courseId.title : 'Legacy payment'}</dd></div>
+                    {selectedPayment.level && <div className="flex justify-between"><dt className="text-gray-500">Level</dt><dd>{selectedPayment.level}</dd></div>}
                     <div className="flex justify-between"><dt className="text-gray-500">Amount</dt><dd className="font-bold text-navy">{selectedPayment.currency} {selectedPayment.amount.toLocaleString()}</dd></div>
                     <div className="flex justify-between"><dt className="text-gray-500">Method</dt><dd>{selectedPayment.method}</dd></div>
                     <div className="flex justify-between"><dt className="text-gray-500">Status</dt>

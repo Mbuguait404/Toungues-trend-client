@@ -8,6 +8,10 @@ export interface CourseModule {
   order: number
   description?: string
   content?: string
+  parts?: Array<{ _id?: string; title: string; content?: string; order: number; accessType: 'free' | 'premium'; locked?: boolean }>
+  accessType?: 'free' | 'premium'
+  accessLevel?: 'full' | 'preview' | 'locked'
+  locked?: boolean
   objectives?: string[]
   estimatedDuration?: number
   prerequisiteModuleIds?: string[]

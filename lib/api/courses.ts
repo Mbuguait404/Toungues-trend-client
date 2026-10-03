@@ -23,6 +23,9 @@ export interface Course {
   language: string
   description?: string
   levels: string[]
+  accessType?: 'paid' | 'free'
+  price?: number
+  currency: 'KES' | 'EUR' | 'CHF' | 'USD'
   teacherIds: CourseTeacher[]
   isActive: boolean
   createdAt?: string
@@ -36,7 +39,15 @@ export function getCourseById(id: string): Promise<Course> {
   return apiFetch<Course>(`/courses/${id}`)
 }
 
-export function createCourse(dto: { title: string; language: string; description: string; levels: string[] }): Promise<Course> {
+export function createCourse(dto: {
+  title: string
+  language: string
+  description: string
+  levels: string[]
+  accessType: 'paid' | 'free'
+  price?: number
+  currency: 'KES' | 'EUR' | 'CHF' | 'USD'
+}): Promise<Course> {
   return apiFetch<Course>('/courses', { method: 'POST', body: dto, auth: true })
 }
 

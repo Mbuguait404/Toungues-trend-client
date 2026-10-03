@@ -13,6 +13,8 @@ function RegisterContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') ?? searchParams.get('next')
+  const paidCourseRegistration = Boolean(redirectTo?.includes('checkout='))
+  const previewRegistration = Boolean(redirectTo?.includes('preview='))
 
   const { refresh } = useAuth()
   const [step, setStep] = useState(1)
@@ -72,10 +74,14 @@ function RegisterContent() {
           <img src="/logo.png" alt="Tongues Trend" className="h-10" />
         </Link>
         <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-          Start your learning journey
+          {paidCourseRegistration ? 'Register to get started' : previewRegistration ? 'Register for the free preview' : 'Start your learning journey'}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Join thousands of students mastering new languages
+          {paidCourseRegistration
+            ? 'This is a paid course. The first lesson part is free; complete payment after registration to unlock the full course.'
+            : previewRegistration
+              ? 'Create your account to access the free first lesson part. The remaining course content is paid.'
+              : 'Join thousands of students mastering new languages'}
         </p>
       </Reveal>
 
@@ -260,7 +266,7 @@ function RegisterContent() {
                     <div className="h-5 w-5 border-2 border-gray-800/30 border-t-gray-900 rounded-full animate-spin" />
                   ) : (
                     <>
-                      Complete Registration
+                      {paidCourseRegistration ? 'Create account & continue to payment' : previewRegistration ? 'Create account & open preview' : 'Complete Registration'}
                       <ArrowRight className="ml-2 h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
