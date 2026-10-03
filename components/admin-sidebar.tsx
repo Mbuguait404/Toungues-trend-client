@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Users, BookOpen, CreditCard, Settings, LogOut } from 'lucide-react'
-import { useState } from 'react'
+import { LayoutDashboard, Users, BookOpen, CreditCard, Settings, LogOut, Inbox } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { getInquiryStats } from '@/lib/api/inquiries'
 
 const ROLE_LABELS: Record<string, string> = { LEARNER: 'Learner', TEACHER: 'Teacher', ADMIN: 'Administrator' }
 
@@ -17,13 +18,27 @@ export default function AdminSidebar() {
   const router = useRouter()
   const { user, logout } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
+  const [newInquiries, setNewInquiries] = useState(0)
+
+  useEffect(() => {
+    let active = true
+    getInquiryStats()
+      .then((stats) => {
+        if (active) setNewInquiries(stats.NEW + stats.IN_PROGRESS)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [pathname])
 
   const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/users', label: 'Users', icon: Users },
-    { href: '/admin/courses', label: 'Courses', icon: BookOpen },
-    { href: '/admin/payments', label: 'Payments', icon: CreditCard },
-    { href: '/admin/settings', label: 'Settings', icon: Settings },
+    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: 0 },
+    { href: '/admin/inquiries', label: 'Inquiries', icon: Inbox, badge: newInquiries },
+    { href: '/admin/users', label: 'Users', icon: Users, badge: 0 },
+    { href: '/admin/courses', label: 'Courses', icon: BookOpen, badge: 0 },
+    { href: '/admin/payments', label: 'Payments', icon: CreditCard, badge: 0 },
+    { href: '/admin/settings', label: 'Settings', icon: Settings, badge: 0 },
   ]
 
   const isActive = (href: string) => pathname.startsWith(href)
@@ -76,6 +91,11 @@ export default function AdminSidebar() {
                 >
                   <Icon size={20} />
                   <span>{item.label}</span>
+                  {item.badge > 0 && (
+                    <span className="ml-auto px-2 py-0.5 rounded-full bg-gold text-navy text-xs font-bold">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               )
             })}

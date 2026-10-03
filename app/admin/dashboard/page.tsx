@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
 import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Users, DollarSign, BookOpen, TrendingUp } from 'lucide-react'
+import { Users, DollarSign, BookOpen, TrendingUp, Inbox } from 'lucide-react'
 import { ArrowUpRight, Loader2, AlertCircle } from 'lucide-react'
+import Link from 'next/link'
 import { getAllUsers, getAllPayments, type Payment } from '@/lib/api/admin'
+import { getAllInquiries, type Inquiry } from '@/lib/api/inquiries'
 import type { AuthUser } from '@/lib/auth'
 
 const KPICard = ({ icon: Icon, label, value, change, isPositive }: any) => (
@@ -33,15 +35,18 @@ export default function AdminDashboard() {
   const [currency, setCurrency] = useState('KES')
   const [users, setUsers] = useState<AuthUser[]>([])
   const [payments, setPayments] = useState<Payment[]>([])
+  const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    Promise.all([getAllUsers(), getAllPayments()])
-      .then(([u, p]) => { setUsers(u); setPayments(p) })
+    Promise.all([getAllUsers(), getAllPayments(), getAllInquiries({ limit: '5' })])
+      .then(([u, p, i]) => { setUsers(u); setPayments(p); setInquiries(i) })
       .catch((err) => setError(err?.message ?? 'Failed to load dashboard data'))
       .finally(() => setIsLoading(false))
   }, [])
+
+  const newInquiries = inquiries.filter((i) => i.status === 'NEW').length
 
   const learners = users.filter((u) => u.role === 'LEARNER')
   const teachers = users.filter((u) => u.role === 'TEACHER')
@@ -104,6 +109,27 @@ export default function AdminDashboard() {
                 </StaggerItem>
                 <StaggerItem className="h-full" duration={0.5}>
                   <KPICard icon={BookOpen} label="Total Transactions" value={payments.length} change={22} isPositive={true} />
+                </StaggerItem>
+                <StaggerItem className="h-full" duration={0.5}>
+                  <Link href="/admin/inquiries" className="block h-full">
+                    <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-gold hover:shadow-sm transition-all h-full">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-12 h-12 bg-gold bg-opacity-10 rounded-lg flex items-center justify-center">
+                          <Inbox size={24} className="text-gold" />
+                        </div>
+                        {newInquiries > 0 && (
+                          <span className="px-2 py-1 rounded-full bg-gold text-navy text-xs font-bold">
+                            {newInquiries} new
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-mid text-sm mb-1">Open Inquiries</p>
+                      <p className="text-3xl font-bold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
+                        {inquiries.length.toLocaleString()}
+                      </p>
+                      <p className="text-xs font-semibold text-gold">View inbox →</p>
+                    </div>
+                  </Link>
                 </StaggerItem>
               </Stagger>
 
@@ -168,6 +194,52 @@ export default function AdminDashboard() {
 
                 {/* Recent Activity */}
                 <div className="lg:col-span-2 space-y-6">
+                  {/* Recent Inquiries */}
+                  <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-navy" style={{ fontFamily: 'Poppins' }}>Recent Inquiries</h3>
+                      <Link href="/admin/inquiries" className="text-sm font-semibold text-gold hover:text-gold-light transition-colors">
+                        View all
+                      </Link>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-gray-light border-b border-gray-100">
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">From</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Subject</th>
+                            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-dark">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {inquiries.length === 0 ? (
+                            <tr><td colSpan={3} className="px-6 py-8 text-center text-gray-400 text-sm">No inquiries yet.</td></tr>
+                          ) : inquiries.map((inquiry, idx) => (
+                            <tr key={inquiry._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-light'}>
+                              <td className="px-6 py-4">
+                                <p className="text-sm font-semibold text-navy">{inquiry.name}</p>
+                                <p className="text-xs text-gray-mid">{inquiry.email}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-sm text-navy max-w-xs truncate">{inquiry.subject}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${
+                                  inquiry.status === 'NEW' ? 'bg-blue-100 text-blue-700'
+                                    : inquiry.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-700'
+                                    : inquiry.status === 'RESOLVED' ? 'bg-green-100 text-green-700'
+                                    : 'bg-gray-200 text-gray-600'
+                                }`}>
+                                  {inquiry.status.replace('_', ' ')}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
                   {/* Recent Sign-ups */}
                   <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                     <div className="p-6 border-b border-gray-100">

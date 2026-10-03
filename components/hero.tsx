@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { FaCalendarDays, FaVideo } from 'react-icons/fa6'
 import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
@@ -35,20 +36,22 @@ export default function Hero() {
 
           {/* CTAs */}
           <Reveal as="div" delay={0.24} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <button
+            <Link
+              href="/courses"
               className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gold text-navy font-semibold hover:bg-gold-light transition-all duration-150"
               style={{ fontFamily: 'Poppins' }}
             >
               <FaVideo size={18} aria-hidden="true" />
               Start Learning
-            </button>
-            <button
+            </Link>
+            <Link
+              href="/contact?subject=Free%20Trial"
               className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-navy transition-all duration-150"
               style={{ fontFamily: 'Poppins' }}
             >
               <FaCalendarDays size={18} aria-hidden="true" />
               Book Your Free Trial
-            </button>
+            </Link>
           </Reveal>
 
           {/* Trust Badges */}

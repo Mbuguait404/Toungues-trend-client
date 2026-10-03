@@ -1,35 +1,81 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
-import { Mail, Phone, MapPin, Clock } from 'lucide-react'
+import { Mail, Phone, MapPin, Clock, ChevronDown, Loader2, AlertCircle } from 'lucide-react'
+import { createInquiry } from '@/lib/api/inquiries'
+import { ApiException } from '@/lib/api'
 import { Reveal, Stagger, StaggerItem } from '@/components/motion'
+
+const SUBJECT_OPTIONS = [
+  'Free Trial Booking',
+  'Free Consultation',
+  'Course Inquiry',
+  'Enrollment Help',
+  'Tutor Matching',
+  'Group Lessons / Corporate Training',
+  'Payments & Billing',
+  'Technical Support',
+  'Other',
+]
 
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    subject: '',
     message: '',
   })
 
+  const [subject, setSubject] = useState('')
+  const [customSubject, setCustomSubject] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('subject')
+    if (!requested) return
+    const match = SUBJECT_OPTIONS.find(
+      (option) => option.toLowerCase() === requested.toLowerCase()
+    )
+    if (match) {
+      setSubject(match)
+    } else {
+      setSubject('Other')
+      setCustomSubject(requested)
+    }
+  }, [])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const resolvedSubject = subject === 'Other' ? customSubject.trim() : subject
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log('[v0] Form submitted:', formData)
-    setSubmitted(true)
-    setTimeout(() => {
-      setSubmitted(false)
-      setFormData({ name: '', email: '', subject: '', message: '' })
-    }, 3000)
+    if (!resolvedSubject) return
+
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      await createInquiry({ ...formData, subject: resolvedSubject })
+      setSubmitted(true)
+      setFormData({ name: '', email: '', message: '' })
+      setSubject('')
+      setCustomSubject('')
+    } catch (err) {
+      setSubmitError(
+        err instanceof ApiException
+          ? err.message
+          : 'Something went wrong. Please try again or email us directly.',
+      )
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const contactInfo = [
@@ -68,7 +114,7 @@ export default function Contact() {
     {
       question: 'Can I schedule a free consultation through this form?',
       answer:
-        'Yes! Mention in the Subject line "Free Consultation" and include your preferred time. Our team will contact you to confirm.',
+        'Yes! Choose "Free Consultation" or "Free Trial Booking" as the subject and include your preferred time in the message. Our team will contact you to confirm.',
     },
     {
       question: 'What information should I include in my message?',
@@ -86,7 +132,7 @@ export default function Contact() {
     },
   ]
 
-  const [expandedFaq, setExpandedFaq] = useState(null)
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
 
   return (
     <main className="w-full bg-white">
@@ -125,9 +171,21 @@ export default function Contact() {
                   <p className="text-green-700">
                     Thank you for reaching out. Our team will respond within 24 hours.
                   </p>
+                  <button
+                    onClick={() => setSubmitted(false)}
+                    className="mt-6 text-sm font-semibold text-green-800 underline hover:text-green-900 transition-colors"
+                  >
+                    Send another message
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {submitError && (
+                    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                      <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-semibold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
                       Full Name
@@ -159,19 +217,51 @@ export default function Contact() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
+                    <label htmlFor="subject" className="block text-sm font-semibold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
                       Subject
                     </label>
-                    <input
-                      type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold focus:ring-opacity-20 transition-all"
-                      placeholder="Free Consultation / Course Inquiry / etc."
-                    />
+                    <div className="relative">
+                      <select
+                        id="subject"
+                        name="subject"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        required
+                        className="w-full appearance-none px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold focus:ring-opacity-20 transition-all"
+                      >
+                        <option value="" disabled>
+                          Select a topic
+                        </option>
+                        {SUBJECT_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        size={18}
+                        aria-hidden="true"
+                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+                    </div>
                   </div>
+
+                  {subject === 'Other' && (
+                    <div>
+                      <label htmlFor="customSubject" className="block text-sm font-semibold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
+                        Tell us what it&apos;s about
+                      </label>
+                      <input
+                        id="customSubject"
+                        type="text"
+                        value={customSubject}
+                        onChange={(e) => setCustomSubject(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold focus:ring-opacity-20 transition-all"
+                        placeholder="Your subject"
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-semibold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
@@ -190,10 +280,12 @@ export default function Contact() {
 
                   <button
                     type="submit"
-                    className="w-full px-6 py-3 rounded-full bg-gold text-navy font-semibold hover:bg-gold-light transition-all duration-150"
+                    disabled={submitting || !subject || (subject === 'Other' && !customSubject.trim())}
+                    className="w-full px-6 py-3 rounded-full bg-gold text-navy font-semibold hover:bg-gold-light transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                     style={{ fontFamily: 'Poppins' }}
                   >
-                    Send Message
+                    {submitting && <Loader2 size={18} className="animate-spin" />}
+                    {submitting ? 'Sending…' : 'Send Message'}
                   </button>
                 </form>
               )}
