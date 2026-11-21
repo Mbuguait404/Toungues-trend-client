@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import AdminTopBar from '@/components/admin-topbar'
+import { Reveal } from '@/components/motion'
 import { ArrowLeft, Download, RotateCw, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { getUserById, updateUserRole, updateUserStatus, getAllPayments } from '@/lib/api/admin'
@@ -99,17 +100,22 @@ export default function UserProfile({ params }: { params: { id: string } }) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminTopBar title={user.name} />
+      <Reveal as="div" duration={0.5} distance={16} amount={0.1}>
+        <AdminTopBar title={user.name} />
+      </Reveal>
       
       <div className="flex-1 overflow-auto">
         <div className="p-8">
           {/* Back Button */}
+          <Reveal duration={0.5} distance={16} amount={0.1}>
           <Link href="/admin/users" className="flex items-center gap-2 text-gold hover:text-gold-light mb-6 transition-colors">
             <ArrowLeft size={20} />
             <span className="font-semibold">Back to Users</span>
           </Link>
+          </Reveal>
 
           {/* Profile Header */}
+          <Reveal duration={0.5} distance={18} amount={0.1} delay={0.05}>
           <div className="bg-white rounded-2xl border border-gray-100 p-8 mb-6">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-6">
@@ -152,12 +158,14 @@ export default function UserProfile({ params }: { params: { id: string } }) {
               </div>
             </div>
           </div>
+          </Reveal>
 
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Actions */}
             <div className="space-y-6">
               {/* Account Settings Card */}
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                   Account Management
@@ -233,11 +241,13 @@ export default function UserProfile({ params }: { params: { id: string } }) {
                   </div>
                 )}
               </div>
+              </Reveal>
             </div>
 
             {/* Right Column - User Data */}
             <div className="lg:col-span-2 space-y-6">
               {/* Tabs */}
+              <Reveal duration={0.5} distance={16} amount={0.05}>
               <div className="flex gap-0 border-b border-gray-100">
                 {[
                   { label: 'Enrollment', value: 'enrollment' },
@@ -258,8 +268,10 @@ export default function UserProfile({ params }: { params: { id: string } }) {
                   </button>
                 ))}
               </div>
+              </Reveal>
 
               {/* Tab Content */}
+              <Reveal duration={0.5} distance={16} amount={0.05} delay={0.05}>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 {activeTab === 'enrollment' && (
                   <div className="space-y-6">
@@ -363,6 +375,7 @@ export default function UserProfile({ params }: { params: { id: string } }) {
                   </div>
                 )}
               </div>
+              </Reveal>
             </div>
           </div>
         </div>

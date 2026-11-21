@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal } from '@/components/motion'
 import {
   Loader2, AlertCircle, CheckCircle2, Plus, ChevronDown, ChevronRight,
   Edit3, Trash2, BookOpen, Clock, FileText, Save, X,
@@ -33,6 +34,8 @@ export default function TeachModules() {
   const [formOrder, setFormOrder] = useState(0)
   const [formDescription, setFormDescription] = useState('')
   const [formContent, setFormContent] = useState('')
+  const [formParts, setFormParts] = useState<Array<{ title: string; content: string; order: number; accessType: 'free' | 'premium' }>>([])
+  const [formAccessType, setFormAccessType] = useState<'free' | 'premium'>('premium')
   const [formObjectives, setFormObjectives] = useState('')
   const [formDuration, setFormDuration] = useState(0)
   const [formNotes, setFormNotes] = useState('')
@@ -81,12 +84,15 @@ export default function TeachModules() {
 
   const openCreateForm = (level: string) => {
     const existing = modulesByLevel[level] || []
+    const hasFreePart = modules.some((module) => module.parts?.some((part) => part.accessType === 'free'))
     setEditingId(null)
     setFormTitle('')
     setFormLevel(level)
     setFormOrder(existing.length + 1)
     setFormDescription('')
     setFormContent('')
+    setFormParts([{ title: 'Introduction', content: '', order: 0, accessType: hasFreePart ? 'premium' : 'free' }])
+    setFormAccessType('premium')
     setFormObjectives('')
     setFormDuration(0)
     setFormNotes('')
@@ -102,6 +108,15 @@ export default function TeachModules() {
     setFormOrder(mod.order)
     setFormDescription(mod.description || '')
     setFormContent(mod.content || '')
+    setFormParts(mod.parts?.length
+      ? mod.parts.map((part) => ({
+          title: part.title,
+          content: part.content ?? '',
+          order: part.order,
+          accessType: part.accessType,
+        }))
+      : [])
+    setFormAccessType(mod.accessType ?? 'premium')
     setFormObjectives((mod.objectives || []).join('\n'))
     setFormDuration(mod.estimatedDuration || 0)
     setFormNotes(mod.notes || '')
@@ -131,6 +146,8 @@ export default function TeachModules() {
         order: formOrder,
         description: formDescription,
         content: formContent,
+        parts: formParts,
+        accessType: formAccessType,
         objectives: formObjectives.split('\n').map(s => s.trim()).filter(Boolean),
         estimatedDuration: formDuration,
         notes: formNotes,
@@ -188,7 +205,7 @@ export default function TeachModules() {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20}>
             <label className="block text-sm font-semibold text-navy mb-3">Select Course</label>
             <select
               value={selectedCourseId}
@@ -200,7 +217,7 @@ export default function TeachModules() {
                 <option key={c._id} value={c._id}>{c.title} ({c.language})</option>
               ))}
             </select>
-          </div>
+          </Reveal>
 
           {!selectedCourseId ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-500">
@@ -208,7 +225,7 @@ export default function TeachModules() {
               <p className="text-lg font-medium">Select a course to manage its modules</p>
             </div>
           ) : showCreateForm ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} amount={0.05}>
               <h3 className="text-lg font-bold text-navy mb-4">
                 {editingId ? 'Edit Module' : 'Create New Module'}
               </h3>
@@ -252,6 +269,62 @@ export default function TeachModules() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold text-sm resize-y" />
               </div>
               <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h4 className="text-sm font-semibold text-navy">Lesson parts</h4>
+                    <p className="text-xs text-gray-500">Only free parts are visible before course payment.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormParts((parts) => [...parts, {
+                      title: '', content: '', order: parts.length,
+                      accessType: 'premium',
+                    }])}
+                    className="flex items-center gap-1 text-xs font-semibold text-navy hover:text-gold"
+                  >
+                    <Plus size={14} /> Add part
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {formParts.map((part, index) => (
+                    <div key={index} className="rounded-lg border border-gray-200 p-3 space-y-2">
+                      <div className="grid grid-cols-[1fr_auto_auto] gap-2">
+                        <input
+                          value={part.title}
+                          onChange={(e) => setFormParts((parts) => parts.map((item, i) => i === index ? { ...item, title: e.target.value } : item))}
+                          placeholder={`Part ${index + 1} title`}
+                          className="min-w-0 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                        />
+                        <select
+                          value={part.accessType}
+                          onChange={(e) => setFormParts((parts) => parts.map((item, i) => i === index ? { ...item, accessType: e.target.value as 'free' | 'premium' } : item))}
+                          className="rounded-lg border border-gray-200 bg-white px-2 text-sm"
+                        >
+                          <option value="free">Free preview</option>
+                          <option value="premium">Premium</option>
+                        </select>
+                        <button type="button" onClick={() => setFormParts((parts) => parts.filter((_, i) => i !== index))} className="px-2 text-red-500" aria-label="Remove lesson part">×</button>
+                      </div>
+                      <textarea
+                        value={part.content}
+                        onChange={(e) => setFormParts((parts) => parts.map((item, i) => i === index ? { ...item, content: e.target.value } : item))}
+                        rows={3}
+                        placeholder="Part content"
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-navy mb-1">Whole module access</label>
+                <select value={formAccessType} onChange={(e) => setFormAccessType(e.target.value as 'free' | 'premium')}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+                  <option value="premium">Premium (use part access above)</option>
+                  <option value="free">Free module</option>
+                </select>
+              </div>
+              <div className="mb-4">
                 <label className="block text-sm font-semibold text-navy mb-1">Learning Objectives (one per line)</label>
                 <textarea value={formObjectives} onChange={(e) => setFormObjectives(e.target.value)} rows={3}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold text-sm resize-y" />
@@ -278,11 +351,11 @@ export default function TeachModules() {
                   <X size={16} /> Cancel
                 </button>
               </div>
-            </div>
+            </Reveal>
           ) : null}
 
           {selectedCourseId && !showCreateForm && (
-            <div className="space-y-6">
+            <Reveal className="space-y-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
               {CEFR_LEVELS.map((level) => {
                 const levelModules = modulesByLevel[level] || []
                 if (levelModules.length === 0) {
@@ -307,24 +380,27 @@ export default function TeachModules() {
                 const isExpanded = expandedLevels[level] !== false
                 return (
                   <div key={level} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                    <button
-                      onClick={() => toggleLevel(level)}
-                      className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
+                    <div className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <button
+                        type="button"
+                        aria-expanded={isExpanded}
+                        onClick={() => toggleLevel(level)}
+                        className="flex min-w-0 items-center gap-3 text-left"
+                      >
                         {isExpanded ? <ChevronDown size={20} className="text-gray-400" /> : <ChevronRight size={20} className="text-gray-400" />}
                         <span className="text-sm font-bold text-navy bg-navy/5 px-3 py-1 rounded-full">
                           {level}
                         </span>
                         <span className="text-xs text-gray-500">{levelModules.length} module{levelModules.length !== 1 ? 's' : ''}</span>
-                      </div>
+                      </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); openCreateForm(level) }}
+                        type="button"
+                        onClick={() => openCreateForm(level)}
                         className="flex items-center gap-1 px-3 py-1.5 bg-gold text-navy text-xs font-semibold rounded-full hover:bg-gold-light transition-all"
                       >
                         <Plus size={14} /> Add
                       </button>
-                    </button>
+                    </div>
                     {isExpanded && (
                       <div className="border-t border-gray-100">
                         {levelModules.map((mod, idx) => {
@@ -345,7 +421,7 @@ export default function TeachModules() {
                                     </p>
                                     <div className="flex items-center gap-3 mt-1">
                                       {mod.description && <p className="text-xs text-gray-500 truncate max-w-md">{mod.description}</p>}
-                                      {mod.estimatedDuration > 0 && (
+                                      {(mod.estimatedDuration ?? 0) > 0 && (
                                         <span className="text-xs text-gray-400 flex items-center gap-1">
                                           <Clock size={12} /> {mod.estimatedDuration} min
                                         </span>
@@ -387,7 +463,7 @@ export default function TeachModules() {
                   </div>
                 )
               })}
-            </div>
+            </Reveal>
           )}
         </div>
       </div>

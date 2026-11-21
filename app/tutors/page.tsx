@@ -3,6 +3,7 @@ import Footer from '@/components/footer'
 import Link from 'next/link'
 import { ArrowRight, Clock, Globe, BookOpen, GraduationCap, Star, CheckCircle } from 'lucide-react'
 import type { Metadata } from 'next'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 export const metadata: Metadata = {
   title: 'Tutors | Tongues Trend – Meet Our Expert Language Teachers',
@@ -116,7 +117,7 @@ export default function TutorsPage() {
           <div className="absolute bottom-0 -left-20 w-72 h-72 rounded-full bg-white/5 blur-2xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <span className="inline-block px-4 py-1.5 bg-gold/20 text-gold rounded-full text-sm font-semibold mb-6 tracking-wide">
             Our Expert Tutors
           </span>
@@ -143,34 +144,34 @@ export default function TutorsPage() {
               Browse Courses
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Stats bar */}
       <section className="bg-gray-light border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          <Stagger className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center" stagger={0.1}>
             {[
               { value: '3', label: 'Expert Tutors' },
               { value: '18+', label: 'Combined Years' },
               { value: '4+', label: 'Subjects Taught' },
               { value: '41+', label: 'Student Reviews' },
             ].map((stat) => (
-              <div key={stat.label}>
+              <StaggerItem key={stat.label}>
                 <p className="text-3xl font-bold text-navy mb-1" style={{ fontFamily: 'Poppins' }}>{stat.value}</p>
                 <p className="text-sm text-gray-mid font-medium">{stat.label}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* Tutors List */}
       <section className="py-20 sm:py-24 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-16">
+          <Stagger className="space-y-16" stagger={0.12} amount={0.05}>
             {tutors.map((tutor, idx) => (
-              <div
+              <StaggerItem
                 key={tutor.id}
                 className={`group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 ${tutor.borderHover}`}
               >
@@ -314,15 +315,15 @@ export default function TutorsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </div>
       </section>
 
       {/* Join as a Tutor CTA */}
       <section className="py-20 bg-gradient-to-br from-navy to-[#1a3f7a]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4" style={{ fontFamily: 'Poppins' }}>
             Are You a Teacher?
           </h2>
@@ -337,7 +338,7 @@ export default function TutorsPage() {
             Join as a Tutor
             <ArrowRight size={18} />
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       <Footer />

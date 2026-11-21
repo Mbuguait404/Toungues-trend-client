@@ -5,6 +5,7 @@ import LearnTopbar from '@/components/learn-topbar'
 import { ChevronLeft, ChevronRight, X, Loader2, AlertCircle } from 'lucide-react'
 import { getMySessions, cancelSession, type Session } from '@/lib/api/sessions'
 import { ApiException } from '@/lib/api'
+import { Reveal } from '@/components/motion'
 
 export default function SchedulePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
@@ -65,7 +66,7 @@ export default function SchedulePage() {
       <LearnTopbar title="Schedule" />
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Calendar */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100">
+        <Reveal className="bg-white rounded-2xl p-6 border border-gray-100" amount={0.05} duration={0.5} distance={18}>
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-navy">Calendar</h3>
             <div className="flex items-center gap-2">
@@ -120,11 +121,13 @@ export default function SchedulePage() {
               )
             })}
           </div>
-        </div>
+        </Reveal>
 
         {/* Upcoming Sessions */}
         <div>
-          <h3 className="text-xl font-bold text-navy mb-4">Upcoming Sessions</h3>
+          <Reveal as="h3" className="text-xl font-bold text-navy mb-4" duration={0.5} distance={16}>
+            Upcoming Sessions
+          </Reveal>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-10 text-gray-400">
@@ -141,7 +144,7 @@ export default function SchedulePage() {
               No upcoming sessions booked.
             </div>
           ) : (
-            <div className="space-y-3">
+            <Reveal className="space-y-3" amount={0.05} duration={0.5} distance={16}>
               {sessions.map((s) => (
                 <div
                   key={s._id}
@@ -189,7 +192,7 @@ export default function SchedulePage() {
                   </div>
                 </div>
               ))}
-            </div>
+            </Reveal>
           )}
         </div>
       </div>

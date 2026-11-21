@@ -23,6 +23,9 @@ export interface Course {
   language: string
   description?: string
   levels: string[]
+  accessType?: 'paid' | 'free'
+  price?: number
+  currency: 'KES' | 'EUR' | 'CHF' | 'USD'
   teacherIds: CourseTeacher[]
   isActive: boolean
   createdAt?: string
@@ -36,7 +39,15 @@ export function getCourseById(id: string): Promise<Course> {
   return apiFetch<Course>(`/courses/${id}`)
 }
 
-export function createCourse(dto: { title: string; language: string; description: string; levels: string[] }): Promise<Course> {
+export function createCourse(dto: {
+  title: string
+  language: string
+  description: string
+  levels: string[]
+  accessType: 'paid' | 'free'
+  price?: number
+  currency: 'KES' | 'EUR' | 'CHF' | 'USD'
+}): Promise<Course> {
   return apiFetch<Course>('/courses', { method: 'POST', body: dto, auth: true })
 }
 
@@ -46,6 +57,11 @@ export function updateCourse(id: string, dto: Partial<Course>): Promise<Course> 
 
 export function deactivateCourse(id: string): Promise<void> {
   return apiFetch<void>(`/courses/${id}`, { method: 'DELETE', auth: true })
+}
+
+/** DELETE only soft-deletes, so bringing a course back goes through update. */
+export function setCourseActive(id: string, isActive: boolean): Promise<Course> {
+  return apiFetch<Course>(`/courses/${id}`, { method: 'PUT', body: { isActive }, auth: true })
 }
 
 export function assignTeacherToCourse(courseId: string, teacherId: string): Promise<Course> {

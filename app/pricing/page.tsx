@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 import { Check, ChevronDown } from 'lucide-react'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 type Currency = 'EUR' | 'CHF' | 'USD' | 'KES'
 
@@ -48,9 +49,9 @@ function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <div className="space-y-3">
+    <Stagger className="space-y-3" stagger={0.08} amount={0.1}>
       {FAQItems.map((item, index) => (
-        <div key={index} className="border border-gray-100 rounded-xl overflow-hidden">
+        <StaggerItem key={index} className="border border-gray-100 rounded-xl overflow-hidden">
           <button
             onClick={() => setOpenIndex(openIndex === index ? null : index)}
             className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-light transition-colors bg-white"
@@ -70,9 +71,9 @@ function FAQAccordion() {
               <p className="text-gray-dark leading-relaxed">{item.answer}</p>
             </div>
           )}
-        </div>
+        </StaggerItem>
       ))}
-    </div>
+    </Stagger>
   )
 }
 
@@ -187,14 +188,14 @@ export default function PricingPage() {
 
       {/* Hero Section */}
       <section className="w-full bg-navy text-white py-16 sm:py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6" style={{ fontFamily: 'Poppins' }}>
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Choose the plan that works for you. All plans include live 1-on-1 lessons with certified teachers and CEFR-aligned curriculum.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* Currency Toggle */}
@@ -236,7 +237,7 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-6">
+          <Reveal className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-6" direction="none" duration={0.7} amount={0.1}>
             <PricingCard
               title="Single Lesson"
               lessons={1}
@@ -266,7 +267,7 @@ export default function PricingPage() {
               highlight={false}
               features={features.monthly}
             />
-          </div>
+          </Reveal>
 
           {/* M-Pesa Badge */}
           {currency === 'KES' && (
@@ -288,25 +289,25 @@ export default function PricingPage() {
 
       {/* Money-Back Guarantee */}
       <section className="w-full bg-gray-light py-16 sm:py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Reveal className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" direction="up">
           <h2 className="text-2xl sm:text-3xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
             30-Day Money-Back Guarantee
           </h2>
           <p className="text-lg text-gray-mid">
             Not satisfied with your first lesson? We offer a full refund within 7 days. Your satisfaction is our priority.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       {/* FAQ Section */}
       <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <Reveal className="text-center mb-16" direction="up">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Pricing Questions
             </h2>
             <p className="text-lg text-gray-mid">Everything you need to know about our pricing and payment options.</p>
-          </div>
+          </Reveal>
 
           <FAQAccordion />
         </div>

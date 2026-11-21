@@ -3,11 +3,12 @@
 import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import LearnTopbar from '@/components/learn-topbar'
-import { Loader2, AlertCircle, CheckCircle2, Circle, ArrowRight, Clock } from 'lucide-react'
+import { Loader2, AlertCircle, CheckCircle2, Circle, ArrowRight, Clock, LockKeyhole } from 'lucide-react'
 import { getEnrollmentById, getEnrollmentCourseName, getEnrollmentLanguage, type Enrollment } from '@/lib/api/enrollments'
 import { getModules, type CourseModule } from '@/lib/api/modules'
 import { getEnrollmentProgress, type Progress } from '@/lib/api/progress'
 import { ApiException } from '@/lib/api'
+import { Reveal } from '@/components/motion'
 
 export default function EnrollmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -35,7 +36,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
 
         const map: Record<string, Progress> = {}
         for (const p of prog) {
-          map[p.moduleId] = p
+          map[p.partId ? `${p.moduleId}:${p.partId}` : p.materialId ? `${p.moduleId}:material:${p.materialId}` : p.moduleId] = p
         }
         setProgressMap(map)
       } catch (err) {
@@ -76,6 +77,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
   const courseName = getEnrollmentCourseName(enrollment)
   const language = getEnrollmentLanguage(enrollment)
   const progress = enrollment.progress ?? 0
+  const courseId = typeof enrollment.courseId === 'object' ? enrollment.courseId._id : enrollment.courseId
 
   const completedCount = modules.filter(m => progressMap[m._id]?.isCompleted).length
   const totalModules = modules.length
@@ -84,7 +86,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
     <>
       <LearnTopbar title={courseName} />
       <div className="flex-1 overflow-y-auto p-6 max-w-4xl">
-        <div className="bg-navy rounded-2xl p-8 text-white mb-8">
+        <Reveal className="bg-navy rounded-2xl p-8 text-white mb-8" amount={0.1} duration={0.5} distance={20}>
           <h2 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Poppins' }}>
             {courseName}
           </h2>
@@ -92,6 +94,9 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
             <span>{language}</span>
             <span>Level: {enrollment.level ?? 'General'}</span>
             <span>{progress}% complete</span>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">
+              {enrollment.accessStatus === 'preview' ? 'Free preview · premium locked' : enrollment.accessStatus === 'free' ? 'Free course' : 'Full access'}
+            </span>
           </div>
           <div className="mt-3 w-full h-2 bg-white/20 rounded-full overflow-hidden">
             <div className="h-full bg-gold transition-all duration-500" style={{ width: `${progress}%` }} />
@@ -101,7 +106,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
               {completedCount} of {totalModules} modules completed
             </p>
           )}
-        </div>
+        </Reveal>
 
         {modules.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 border border-gray-100 text-center">
@@ -110,28 +115,33 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between mb-4">
+            <Reveal className="flex items-center justify-between mb-4" amount={0.1} duration={0.5} distance={16}>
               <h3 className="text-xl font-bold text-navy" style={{ fontFamily: 'Poppins' }}>
                 Course Modules
               </h3>
               <span className="text-sm text-gray-500">
                 {completedCount}/{totalModules} completed
               </span>
-            </div>
-            <div className="space-y-3">
+            </Reveal>
+            <Reveal className="space-y-3" amount={0.05} duration={0.5} distance={16}>
               {modules.map((mod, idx) => {
                 const prog = progressMap[mod._id]
                 const isCompleted = prog?.isCompleted ?? false
+                const isLocked = Boolean(mod.locked)
                 return (
                   <button
                     key={mod._id}
-                    onClick={() => router.push(`/learn/modules/${mod._id}?enrollmentId=${id}`)}
+                    onClick={() => router.push(isLocked
+                      ? `/courses?checkout=${courseId}&level=${enrollment.level}`
+                      : `/learn/modules/${mod._id}?enrollmentId=${id}`)}
                     className={`w-full bg-white rounded-xl p-4 border text-left transition-all hover:border-gold hover:shadow-sm flex items-center gap-4 ${
-                      isCompleted ? 'border-green-200 bg-green-50/50' : 'border-gray-100'
+                      isLocked ? 'border-amber-200 bg-amber-50/40' : isCompleted ? 'border-green-200 bg-green-50/50' : 'border-gray-100'
                     }`}
                   >
                     <div className="flex-shrink-0">
-                      {isCompleted ? (
+                      {isLocked ? (
+                        <LockKeyhole size={22} className="text-amber-600" />
+                      ) : isCompleted ? (
                         <CheckCircle2 size={22} className="text-green-500" />
                       ) : (
                         <Circle size={22} className="text-gray-300" />
@@ -141,11 +151,12 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
                       <p className="font-semibold text-navy text-sm">
                         {idx + 1}. {mod.title}
                       </p>
+                      {mod.locked && <p className="mt-1 text-xs font-semibold text-amber-700">Premium · Pay to unlock</p>}
                       <div className="flex items-center gap-3 mt-1">
                         {mod.description && (
                           <p className="text-xs text-gray-500 truncate">{mod.description}</p>
                         )}
-                        {mod.estimatedDuration > 0 && (
+                        {(mod.estimatedDuration ?? 0) > 0 && (
                           <span className="text-xs text-gray-400 flex items-center gap-1">
                             <Clock size={12} />
                             {mod.estimatedDuration} min
@@ -157,11 +168,11 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
                   </button>
                 )
               })}
-            </div>
+            </Reveal>
           </>
         )}
 
-        <div className="mt-10 bg-gray-light rounded-2xl p-6 text-center">
+        <Reveal className="mt-10 bg-gray-light rounded-2xl p-6 text-center" amount={0.1} duration={0.5} distance={18}>
           <h4 className="text-lg font-bold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
             Want to learn another language?
           </h4>
@@ -172,7 +183,7 @@ export default function EnrollmentDetailPage({ params }: { params: Promise<{ id:
           >
             Browse Courses <ArrowRight size={16} />
           </button>
-        </div>
+        </Reveal>
       </div>
     </>
   )

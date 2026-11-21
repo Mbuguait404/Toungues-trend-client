@@ -7,11 +7,15 @@ export interface Enrollment {
   language?: string
   level?: string
   progress?: number
-  completedModules?: number
+/** Matches the API DTO — the raw mongoose array is not serialised. */
+  completedModulesCount?: number
   totalModules?: number
-  isActive: boolean
+  status?: 'active' | 'paused' | 'completed'
+  accessStatus?: 'preview' | 'paid' | 'free'
+  startedAt?: string
+  paidAt?: string
+  completedAt?: string
   createdAt: string
-  status?: string
 }
 
 // Helper to resolve populated course fields
@@ -39,4 +43,11 @@ export function getEnrollmentById(id: string): Promise<Enrollment> {
 
 export function enrolInCourse(courseId: string, level: string): Promise<Enrollment> {
   return apiFetch<Enrollment>('/enrollments', { method: 'POST', body: { courseId, level }, auth: true })
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export function getAllEnrollments(query?: Record<string, string>): Promise<Enrollment[]> {
+  const qs = query ? '?' + new URLSearchParams(query).toString() : ''
+  return apiFetch<Enrollment[]>(`/enrollments${qs}`, { auth: true })
 }

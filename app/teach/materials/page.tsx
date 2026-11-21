@@ -1,6 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal } from '@/components/motion'
 import { Upload, FileText, Music, Video, File, Trash2, Loader2, AlertCircle, CheckCircle2, Play, Link as LinkIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { getMyMaterials, uploadMaterial, uploadYoutubeMaterial } from '@/lib/api/teacher'
@@ -34,6 +35,8 @@ export default function TeachMaterials() {
   const [title, setTitle] = useState('')
   const [selectedCourseId, setSelectedCourseId] = useState('')
   const [selectedModuleId, setSelectedModuleId] = useState('')
+  const [selectedPartId, setSelectedPartId] = useState('')
+  const [materialAccessType, setMaterialAccessType] = useState<'free' | 'premium'>('premium')
   const [courses, setCourses] = useState<Course[]>([])
   const [courseModules, setCourseModules] = useState<CourseModule[]>([])
   const [uploading, setUploading] = useState(false)
@@ -95,9 +98,16 @@ export default function TeachMaterials() {
         fd.append('title', title)
         if (selectedCourseId) fd.append('courseId', selectedCourseId)
         if (selectedModuleId) fd.append('moduleId', selectedModuleId)
+        if (selectedPartId) fd.append('partId', selectedPartId)
+        fd.append('accessType', materialAccessType)
         newMaterial = await uploadMaterial(fd)
       } else {
-        newMaterial = await uploadYoutubeMaterial(title, youtubeUrl)
+        newMaterial = await uploadYoutubeMaterial(title, youtubeUrl, {
+          courseId: selectedCourseId || undefined,
+          moduleId: selectedModuleId || undefined,
+          partId: selectedPartId || undefined,
+          accessType: materialAccessType,
+        })
       }
       setMaterials((prev) => [newMaterial, ...prev])
       setUploadFile(null)
@@ -105,6 +115,8 @@ export default function TeachMaterials() {
       setTitle('')
       setSelectedCourseId('')
       setSelectedModuleId('')
+      setSelectedPartId('')
+      setMaterialAccessType('premium')
       setUploadSuccess(true)
       setTimeout(() => setUploadSuccess(false), 3000)
     } catch (err) {
@@ -133,7 +145,7 @@ export default function TeachMaterials() {
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6 max-w-7xl">
           {/* Upload Section */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-8" direction="up" duration={0.5} distance={20}>
             <h2 className="text-xl font-bold text-navy mb-6" style={{ fontFamily: 'Poppins' }}>
               Upload New Material
             </h2>
@@ -252,6 +264,21 @@ export default function TeachMaterials() {
                     </select>
                   </div>
                 </div>
+                {selectedModuleId && courseModules.find((module) => module._id === selectedModuleId)?.parts?.length ? (
+                  <div>
+                    <label className="block text-sm font-semibold text-navy mb-2">Lesson part</label>
+                    <select
+                      value={selectedPartId}
+                      onChange={(e) => setSelectedPartId(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm"
+                    >
+                      <option value="">Not attached to a specific part</option>
+                      {courseModules.find((module) => module._id === selectedModuleId)?.parts?.map((part) => (
+                        <option key={part._id} value={part._id}>{part.title} ({part.accessType})</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
                 <div>
                   <label className="block text-sm font-semibold text-navy mb-2">Material Title *</label>
                   <input
@@ -261,6 +288,17 @@ export default function TeachMaterials() {
                     placeholder="Enter material title"
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-navy mb-2">Content access</label>
+                  <select
+                    value={materialAccessType}
+                    onChange={(e) => setMaterialAccessType(e.target.value as 'free' | 'premium')}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm"
+                  >
+                    <option value="premium">Premium (default)</option>
+                    <option value="free">Free resource</option>
+                  </select>
                 </div>
                 <button
                   onClick={handleUpload}
@@ -272,10 +310,10 @@ export default function TeachMaterials() {
                 </button>
               </div>
             )}
-          </div>
+          </Reveal>
 
           {/* Materials Library */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
             <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Uploaded Materials ({materials.length})
             </h3>
@@ -322,6 +360,9 @@ export default function TeachMaterials() {
                     <h4 className="font-semibold text-navy mb-2" style={{ fontFamily: 'Poppins' }}>
                       {m.title}
                     </h4>
+                    <span className={`mb-3 inline-block rounded-full px-2 py-1 text-[10px] font-semibold uppercase ${m.accessType === 'free' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {m.accessType ?? 'premium'}
+                    </span>
 
                     <p className="text-xs text-gray-500 mb-4">
                       Uploaded {new Date(m.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
@@ -349,7 +390,7 @@ export default function TeachMaterials() {
                 ))}
               </div>
             )}
-          </div>
+          </Reveal>
         </div>
       </div>
     </div>

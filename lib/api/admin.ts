@@ -30,18 +30,34 @@ export function updateUserStatus(id: string, isActive: boolean): Promise<AuthUse
 
 export interface Payment {
   _id: string
-  userId: string
+  userId: string | { _id: string; name: string; email: string }
   userName?: string
+  courseId?: string | { _id: string; title: string; language: string }
+  level?: string
+  purchaseType?: string
   amount: number
   currency: string
-  method: 'MPESA' | 'STRIPE'
-  status: 'SUCCESS' | 'PENDING' | 'FAILED'
+  method: 'payhero' | 'stripe' | string
+  status: 'success' | 'pending' | 'failed'
   createdAt: string
 }
 
-export function getAllPayments(query?: Record<string, string>): Promise<Payment[]> {
-  const qs = query ? '?' + new URLSearchParams(query).toString() : ''
-  return apiFetch<Payment[]>(`/payments${qs}`, { auth: true })
+export async function getAllPayments(query?: Record<string, string>): Promise<Payment[]> {
+  if (query?.page || query?.limit) {
+    const qs = '?' + new URLSearchParams(query).toString()
+    return apiFetch<Payment[]>(`/payments${qs}`, { auth: true })
+  }
+
+  const pageSize = 100
+  const payments: Payment[] = []
+  for (let page = 1; ; page++) {
+    const params = new URLSearchParams(query)
+    params.set('page', String(page))
+    params.set('limit', String(pageSize))
+    const result = await apiFetch<Payment[]>(`/payments?${params.toString()}`, { auth: true })
+    payments.push(...result)
+    if (result.length < pageSize) return payments
+  }
 }
 
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
@@ -69,7 +85,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const teachers = users.filter((u) => u.role === 'TEACHER')
   const newSignups = users.filter((u) => new Date((u as any).createdAt) >= monthStart)
   const monthPayments = payments.filter(
-    (p) => p.status === 'SUCCESS' && new Date(p.createdAt) >= monthStart,
+    (p) => p.status === 'success' && p.currency === 'KES' && new Date(p.createdAt) >= monthStart,
   )
   const revenue = monthPayments.reduce((acc, p) => acc + p.amount, 0)
 

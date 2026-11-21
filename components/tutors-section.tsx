@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Clock, BookOpen, Globe } from 'lucide-react'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 const tutors = [
   {
@@ -58,7 +59,7 @@ export default function TutorsSection() {
     <section className="w-full bg-white py-20 sm:py-24 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="text-center mb-16 sm:mb-20">
+        <Reveal className="text-center mb-16 sm:mb-20">
           <span className="inline-block px-4 py-1.5 bg-gold/10 text-[#c17c00] rounded-full text-sm font-semibold mb-4 tracking-wide">
             Meet Our Tutors
           </span>
@@ -68,12 +69,12 @@ export default function TutorsSection() {
           <p className="text-lg text-gray-mid max-w-2xl mx-auto leading-relaxed">
             Our certified, experienced tutors are committed to helping you achieve fluency and confidence in every lesson.
           </p>
-        </div>
+        </Reveal>
 
         {/* Tutors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-12">
+        <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-12" stagger={0.12} amount={0.05}>
           {tutors.map((tutor) => (
-            <div
+            <StaggerItem
               key={tutor.id}
               className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-gold hover:shadow-xl transition-all duration-300"
             >
@@ -162,12 +163,12 @@ export default function TutorsSection() {
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
         {/* View All CTA */}
-        <div className="text-center">
+        <Reveal className="text-center" delay={0.1}>
           <Link
             href="/tutors"
             className="inline-flex items-center gap-2 px-8 py-3 border-2 border-navy text-navy font-semibold rounded-full hover:bg-navy hover:text-white transition-all duration-200"
@@ -176,7 +177,7 @@ export default function TutorsSection() {
             View All Tutors
             <ArrowRight size={16} />
           </Link>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

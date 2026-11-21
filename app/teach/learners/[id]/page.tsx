@@ -1,6 +1,7 @@
 'use client'
 
 import TeachTopbar from '@/components/teach-topbar'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
@@ -100,16 +101,18 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
       <div className="flex-1 overflow-auto">
         <div className="p-6 space-y-6 max-w-7xl">
           {/* Back Button */}
-          <Link
-            href="/teach/learners"
-            className="flex items-center gap-2 text-gold hover:text-gold-light transition-colors w-fit"
-          >
-            <ArrowLeft size={20} />
-            <span>Back to Learners</span>
-          </Link>
+          <Reveal direction="up" duration={0.5} distance={16}>
+            <Link
+              href="/teach/learners"
+              className="flex items-center gap-2 text-gold hover:text-gold-light transition-colors w-fit"
+            >
+              <ArrowLeft size={20} />
+              <span>Back to Learners</span>
+            </Link>
+          </Reveal>
 
           {/* Profile Header */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-8" direction="up" duration={0.5} distance={20} delay={0.06}>
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center text-navy font-bold text-2xl">
@@ -142,11 +145,11 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
                 <p className="font-semibold text-navy">{new Date(learner.enrolledDate).toLocaleDateString()}</p>
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Progress Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 gap-6" stagger={0.1} delay={0.1}>
+            <StaggerItem className="bg-white rounded-2xl border border-gray-100 p-6" duration={0.5}>
               <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
                 Overall Progress
               </h3>
@@ -172,10 +175,10 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
                   Certificates earned: <span className="font-semibold text-navy">{progressOverview.certificatesEarned}</span>
                 </p>
               </div>
-            </div>
+            </StaggerItem>
 
             {/* Quick Stats */}
-            <div className="space-y-4">
+            <StaggerItem className="space-y-4" duration={0.5}>
               <div className="bg-green-50 rounded-2xl border border-green-100 p-6">
                 <p className="text-sm text-green-700 mb-2">Learning Streak</p>
                 <p className="text-2xl font-bold text-green-700" style={{ fontFamily: 'Poppins' }}>
@@ -188,11 +191,11 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
                   2 days ago
                 </p>
               </div>
-            </div>
-          </div>
+            </StaggerItem>
+          </Stagger>
 
           {/* Module Progress */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} amount={0.05}>
             <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Module Progress
             </h3>
@@ -220,10 +223,10 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
 
           {/* Session History */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
             <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Session History
             </h3>
@@ -260,10 +263,10 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
                 </tbody>
               </table>
             </div>
-          </div>
+          </Reveal>
 
           {/* Materials Assigned */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <Reveal className="bg-white rounded-2xl border border-gray-100 p-6" direction="up" duration={0.5} distance={20} delay={0.1} amount={0.05}>
             <h3 className="text-lg font-bold text-navy mb-4" style={{ fontFamily: 'Poppins' }}>
               Materials Assigned
             </h3>
@@ -284,7 +287,7 @@ export default function LearnerProfile({ params }: { params: { id: string } }) {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
 

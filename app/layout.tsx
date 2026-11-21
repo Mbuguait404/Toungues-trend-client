@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Poppins } from 'next/font/google'
 import './globals.css'
 import FloatingSocialIcons from '@/components/floating-social-icons'
+import { MotionProvider } from '@/components/motion'
 import { AuthProvider } from '@/context/AuthContext'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -21,21 +22,7 @@ export const metadata: Metadata = {
   description: 'Live 1-on-1 language lessons in French, English, German & Kiswahili from certified teachers worldwide. CEFR aligned, flexible scheduling, digital certificates.',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/Favicon.ico',
   },
 }
 
@@ -52,11 +39,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} bg-white`}>
       <body className="font-sans antialiased bg-white text-gray-dark" suppressHydrationWarning>
-        <AuthProvider>
-          {children}
-          <FloatingSocialIcons />
-          {process.env.NODE_ENV === 'production' && <Analytics />}
-        </AuthProvider>
+        <MotionProvider>
+          <AuthProvider>
+            {children}
+            <FloatingSocialIcons />
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </AuthProvider>
+        </MotionProvider>
       </body>
     </html>
   )

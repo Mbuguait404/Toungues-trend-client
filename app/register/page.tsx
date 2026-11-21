@@ -7,11 +7,14 @@ import { Lock, Mail, User, ArrowRight, BookOpen, GraduationCap, ChevronRight, Al
 import { register as apiRegister } from '@/lib/auth'
 import { ApiException } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 function RegisterContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') ?? searchParams.get('next')
+  const paidCourseRegistration = Boolean(redirectTo?.includes('checkout='))
+  const previewRegistration = Boolean(redirectTo?.includes('preview='))
 
   const { refresh } = useAuth()
   const [step, setStep] = useState(1)
@@ -66,22 +69,26 @@ function RegisterContent() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 rounded-full blur-[120px]" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+      <Reveal direction="down" distance={18} duration={0.5} className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <Link href="/" className="flex justify-center mb-6">
           <img src="/logo.png" alt="Tongues Trend" className="h-10" />
         </Link>
         <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-          Start your learning journey
+          {paidCourseRegistration ? 'Register to get started' : previewRegistration ? 'Register for the free preview' : 'Start your learning journey'}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Join thousands of students mastering new languages
+          {paidCourseRegistration
+            ? 'This is a paid course. The first lesson part is free; complete payment after registration to unlock the full course.'
+            : previewRegistration
+              ? 'Create your account to access the free first lesson part. The remaining course content is paid.'
+              : 'Join thousands of students mastering new languages'}
         </p>
-      </div>
+      </Reveal>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
+      <Reveal delay={0.05} distance={16} duration={0.5} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <Stagger stagger={0.08} delay={0.12} className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
 
-          <div className="mb-8">
+          <StaggerItem duration={0.5} className="mb-8">
             <div className="flex items-center justify-between relative">
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0" />
               <div
@@ -99,7 +106,7 @@ function RegisterContent() {
               <span>Account Details</span>
               <span>Learning Goals</span>
             </div>
-          </div>
+          </StaggerItem>
 
           {error && (
             <div className="flex items-start gap-3 p-3 mb-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
@@ -259,7 +266,7 @@ function RegisterContent() {
                     <div className="h-5 w-5 border-2 border-gray-800/30 border-t-gray-900 rounded-full animate-spin" />
                   ) : (
                     <>
-                      Complete Registration
+                      {paidCourseRegistration ? 'Create account & continue to payment' : previewRegistration ? 'Create account & open preview' : 'Complete Registration'}
                       <ArrowRight className="ml-2 h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -268,7 +275,7 @@ function RegisterContent() {
             </form>
           )}
 
-          <div className="mt-8">
+          <StaggerItem duration={0.5} className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200" />
@@ -288,9 +295,9 @@ function RegisterContent() {
                 Sign in to your account
               </Link>
             </div>
-          </div>
-        </div>
-      </div>
+          </StaggerItem>
+        </Stagger>
+      </Reveal>
     </div>
   )
 }

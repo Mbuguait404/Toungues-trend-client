@@ -5,6 +5,7 @@ import LearnTopbar from '@/components/learn-topbar'
 import { Award, Download, Share2, Loader2, AlertCircle } from 'lucide-react'
 import { getMyCertificates, type Certificate } from '@/lib/api/certificates'
 import { ApiException } from '@/lib/api'
+import { Reveal } from '@/components/motion'
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([])
@@ -35,7 +36,7 @@ export default function CertificatesPage() {
             {error}
           </div>
         ) : certificates.length > 0 ? (
-          <div>
+          <Reveal amount={0.05} duration={0.5} distance={18}>
             <h3 className="text-xl font-bold text-navy mb-6">Your Certificates</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {certificates.map((cert) => (
@@ -85,7 +86,7 @@ export default function CertificatesPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <Award size={64} className="text-gray-300 mb-4" />
