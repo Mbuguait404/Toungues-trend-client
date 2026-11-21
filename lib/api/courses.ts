@@ -59,6 +59,11 @@ export function deactivateCourse(id: string): Promise<void> {
   return apiFetch<void>(`/courses/${id}`, { method: 'DELETE', auth: true })
 }
 
+/** DELETE only soft-deletes, so bringing a course back goes through update. */
+export function setCourseActive(id: string, isActive: boolean): Promise<Course> {
+  return apiFetch<Course>(`/courses/${id}`, { method: 'PUT', body: { isActive }, auth: true })
+}
+
 export function assignTeacherToCourse(courseId: string, teacherId: string): Promise<Course> {
   return apiFetch<Course>(`/courses/${courseId}/teachers/add`, { method: 'PATCH', body: { teacherId }, auth: true })
 }

@@ -55,7 +55,7 @@ export default function AdminSettings() {
     setTemplateBody(emailTemplates[templateKey as keyof typeof emailTemplates].body)
   }
 
-  const handleCurrencyToggle = (currency: string) => {
+  const handleCurrencyToggle = (currency: keyof typeof supportedCurrencies) => {
     setSupportedCurrencies(prev => ({
       ...prev,
       [currency]: !prev[currency],
@@ -373,7 +373,9 @@ export default function AdminSettings() {
                 </h3>
 
                 <div className="space-y-3 mb-6">
-                  {Object.entries(supportedCurrencies).map(([currency, enabled]) => (
+                  {(Object.keys(supportedCurrencies) as (keyof typeof supportedCurrencies)[]).map((currency) => {
+                    const enabled = supportedCurrencies[currency]
+                    return (
                     <div key={currency} className="flex items-center justify-between p-4 bg-gray-light rounded-lg">
                       <span className="font-semibold text-navy">{currency}</span>
                       <button
@@ -389,7 +391,8 @@ export default function AdminSettings() {
                         />
                       </button>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
 
                 <div className="flex gap-4">

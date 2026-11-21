@@ -380,24 +380,27 @@ export default function TeachModules() {
                 const isExpanded = expandedLevels[level] !== false
                 return (
                   <div key={level} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                    <button
-                      onClick={() => toggleLevel(level)}
-                      className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
+                    <div className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                      <button
+                        type="button"
+                        aria-expanded={isExpanded}
+                        onClick={() => toggleLevel(level)}
+                        className="flex min-w-0 items-center gap-3 text-left"
+                      >
                         {isExpanded ? <ChevronDown size={20} className="text-gray-400" /> : <ChevronRight size={20} className="text-gray-400" />}
                         <span className="text-sm font-bold text-navy bg-navy/5 px-3 py-1 rounded-full">
                           {level}
                         </span>
                         <span className="text-xs text-gray-500">{levelModules.length} module{levelModules.length !== 1 ? 's' : ''}</span>
-                      </div>
+                      </button>
                       <button
-                        onClick={(e) => { e.stopPropagation(); openCreateForm(level) }}
+                        type="button"
+                        onClick={() => openCreateForm(level)}
                         className="flex items-center gap-1 px-3 py-1.5 bg-gold text-navy text-xs font-semibold rounded-full hover:bg-gold-light transition-all"
                       >
                         <Plus size={14} /> Add
                       </button>
-                    </button>
+                    </div>
                     {isExpanded && (
                       <div className="border-t border-gray-100">
                         {levelModules.map((mod, idx) => {

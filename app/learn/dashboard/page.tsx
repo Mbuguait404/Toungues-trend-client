@@ -82,7 +82,7 @@ export default function DashboardPage() {
     )
   }, [enrollments])
 
-  const activeEnrollments = enrollments.filter((e) => e.isActive !== false).length
+  const activeEnrollments = enrollments.filter((e) => e.status === 'active').length
   const firstName = user?.name?.split(' ')[0] ?? 'there'
 
   if (isLoading) {
